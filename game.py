@@ -42,6 +42,8 @@ class Game:
         self.rooms.append(swamp)
         castle = Room("Castle", "dans un énorme château fort avec des douves et un pont levis. Sur les tours, des flèches en or massif.")
         self.rooms.append(castle)
+        Salle_1 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !")
+        self.rooms.append(Salle_1)
 
         # Create exits for rooms
 
@@ -51,11 +53,11 @@ class Game:
         cottage.exits = {"N" : None, "E" : None, "S" : tower, "O" : cave}
         swamp.exits = {"N" : tower, "E" : None, "S" : None, "O" : castle}
         castle.exits = {"N" : forest, "E" : swamp, "S" : None, "O" : None}
-
-        # Setup player and starting room
+        Salle_1.exits = { "aller dans le couloir" : cottage, "rester dans la salle" : forest, "O" : None}
+        # Setup player and starting roomSFS
 
         self.player = Player(input("\nEntrez votre nom: "))
-        self.player.current_room = swamp
+        self.player.current_room = Salle_1
 
     # Play the game
     def play(self):
