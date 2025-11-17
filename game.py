@@ -15,6 +15,7 @@ class Game:
         self.rooms = []
         self.commands = {}
         self.player = None
+        
     
     # Setup the game
     def setup(self):
@@ -44,7 +45,10 @@ class Game:
         self.rooms.append(castle)
         Salle_1 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !")
         self.rooms.append(Salle_1)
-
+        Couloir_1 = Room("Couloir 1", "dans le Couloir 1. Vous voyez des portes tout autour de vous.")
+        self.rooms.append(Couloir_1)
+        dehors = Room("dehors", "dehors. Il n'y a rien d'intéressant ici...")
+        self.rooms.append(dehors)
         # Create exits for rooms
 
         forest.exits = {"N" : cave, "E" : tower, "S" : castle, "O" : None}
@@ -53,7 +57,9 @@ class Game:
         cottage.exits = {"N" : None, "E" : None, "S" : tower, "O" : cave}
         swamp.exits = {"N" : tower, "E" : None, "S" : None, "O" : castle}
         castle.exits = {"N" : forest, "E" : swamp, "S" : None, "O" : None}
-        Salle_1.exits = { "aller dans le couloir" : cottage, "rester dans la salle" : forest, "O" : None}
+        Salle_1.exits = { "couloir" : Couloir_1, "rester dans la salle" : forest, "O" : ""}
+        Couloir_1.exits = {"aller à l'ext": dehors, "entrer dans la Salle 2" : "interdit"}                  
+        dehors.exits = {"retourner dans le couloir" : Couloir_1.exits}
         # Setup player and starting roomSFS
 
         self.player = Player(input("\nEntrez votre nom: "))
