@@ -31,35 +31,27 @@ class Game:
         
         # Setup rooms
 
-        forest = Room("Forest", "dans une forêt enchantée. Vous entendez une brise légère à travers la cime des arbres.")
-        self.rooms.append(forest)
-        tower = Room("Tower", "dans une immense tour en pierre qui s'élève au dessus des nuages.")
-        self.rooms.append(tower)
-        cave = Room("Cave", "dans une grotte profonde et sombre. Des voix semblent provenir des profondeurs.")
-        self.rooms.append(cave)
-        cottage = Room("Cottage", "dans un petit chalet pittoresque avec un toit de chaume. Une épaisse fumée verte sort de la cheminée.")
-        self.rooms.append(cottage)
-        swamp = Room("Swamp", "dans un marécage sombre et ténébreux. L'eau bouillonne, les abords sont vaseux.")
-        self.rooms.append(swamp)
-        castle = Room("Castle", "dans un énorme château fort avec des douves et un pont levis. Sur les tours, des flèches en or massif.")
-        self.rooms.append(castle)
+       
         Salle_1 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !")
         self.rooms.append(Salle_1)
         Couloir_1 = Room("Couloir 1", "dans le Couloir 1. Vous voyez des portes tout autour de vous.")
         self.rooms.append(Couloir_1)
-        dehors = Room("dehors", "dehors. Il n'y a rien d'intéressant ici...")
+        Couloir_2 =  Room("couloir 2", "dans le Couloir 2. Vous voyez des portes tout autour de vous.")
+        self.rooms.append(Couloir_2)
+        dehors = Room("dehors", "dehors.  ressant ici...")
         self.rooms.append(dehors)
+        Rue = Room("Rue", "dans la rue de l'ESIEE. Vous voyez une grande allée et pleins d'endroits où aller")
+        self.rooms.append(Rue)
         # Create exits for rooms
 
-        forest.exits = {"N" : cave, "E" : tower, "S" : castle, "O" : None}
-        tower.exits = {"N" : cottage, "E" : None, "S" : swamp, "O" : forest}
-        cave.exits = {"N" : None, "E" : cottage, "S" : forest, "O" : None}
-        cottage.exits = {"N" : None, "E" : None, "S" : tower, "O" : cave}
-        swamp.exits = {"N" : tower, "E" : None, "S" : None, "O" : castle}
-        castle.exits = {"N" : forest, "E" : swamp, "S" : None, "O" : None}
         Salle_1.exits = { "couloir" : Couloir_1, "rester dans la salle" : forest, "O" : ""}
-        Couloir_1.exits = {"aller à l'ext": dehors, "entrer dans la Salle 2" : "interdit"}                  
-        dehors.exits = {"retourner dans le couloir" : Couloir_1.exits}
+        Couloir_1.exits = {"aller à l'ext": dehors, "entrer dans la Salle 2" : "interdit", "aller dans la rue" : Rue}                  
+        dehors.exits = {"retourner dans le couloir" : Couloir_1}
+        Rue.exits={"aller dans le couloir 1" : Couloir_1, "aller dans le couloir 2" : Couloir_2}
+        Couloir_2.exits={"aller dans a salle 3" :  salle3, "aller à l'ext": dehors, "aller dans la rue" : Rue}
+
+
+
         # Setup player and starting roomSFS
 
         self.player = Player(input("\nEntrez votre nom: "))
