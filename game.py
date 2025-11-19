@@ -34,6 +34,8 @@ class Game:
        
         Salle_1 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !")
         self.rooms.append(Salle_1)
+        Salle_3 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !")
+        self.rooms.append(Salle_3)
         Couloir_1 = Room("Couloir 1", "dans le Couloir 1. Vous voyez des portes tout autour de vous.")
         self.rooms.append(Couloir_1)
         Couloir_2 =  Room("couloir 2", "dans le Couloir 2. Vous voyez des portes tout autour de vous.")
@@ -44,11 +46,11 @@ class Game:
         self.rooms.append(Rue)
         # Create exits for rooms
 
-        Salle_1.exits = { "couloir" : Couloir_1, "rester dans la salle" : forest, "O" : ""}
+        Salle_1.exits = { "couloir" : Couloir_1, "rester dans la salle" : Salle_1, "O" : ""}
         Couloir_1.exits = {"aller à l'ext": dehors, "entrer dans la Salle 2" : "interdit", "aller dans la rue" : Rue}                  
         dehors.exits = {"retourner dans le couloir" : Couloir_1}
         Rue.exits={"aller dans le couloir 1" : Couloir_1, "aller dans le couloir 2" : Couloir_2}
-        Couloir_2.exits={"aller dans a salle 3" :  salle3, "aller à l'ext": dehors, "aller dans la rue" : Rue}
+        Couloir_2.exits={"aller dans a salle 3" :  Salle_3, "aller à l'ext": dehors, "aller dans la rue" : Rue}
 
 
 

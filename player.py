@@ -24,7 +24,10 @@ class Player():
         self.current_room = next_room
         print(self.current_room.get_long_description())
         return True
-
+    
+    def history(self, history):
+        history = []
+        history.append
 
 
         
