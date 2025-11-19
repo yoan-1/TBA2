@@ -6,7 +6,7 @@ from room import Room
 from player import Player
 from command import Command
 from actions import Actions
-
+from character import character
 class Game:
 
     # Constructor
@@ -52,7 +52,10 @@ class Game:
         Rue.exits={"aller dans le couloir 1" : Couloir_1, "aller dans le couloir 2" : Couloir_2}
         Couloir_2.exits={"aller dans a salle 3" :  Salle_3, "aller à l'ext": dehors, "aller dans la rue" : Rue}
 
+ #setup des pnj/monstres 
 
+        demogorgon=character("Démogorgon","grand, grosse bouche avec plein de dents", club_musique, "[je serai le président de tous les français]")
+        pnj=character("jean bomber","une personne classique",cafetaria,"[Tu veux aller où?]")
 
         # Setup player and starting roomSFS
 
