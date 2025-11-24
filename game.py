@@ -7,7 +7,6 @@ from player import Player
 from command import Command
 from actions import Actions
 from character import character
-
 class Game:
 
     # Constructor
@@ -35,7 +34,7 @@ class Game:
        
         Salle_1 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !")
         self.rooms.append(Salle_1)
-        Salle_3 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !")
+        Salle_3 = Room("Salle 3", "dans la Salle 3. Il n'y a rien d'interressant ici...")
         self.rooms.append(Salle_3)
         Couloir_1 = Room("Couloir 1", "dans le Couloir 1. Vous voyez des portes tout autour de vous.")
         self.rooms.append(Couloir_1)
@@ -47,21 +46,22 @@ class Game:
         self.rooms.append(Rue)
         # Create exits for rooms
 
-        Salle_1.exits = { "couloir" : Couloir_1, "rester dans la salle" : Salle_1, "O" : ""}
-        Couloir_1.exits = {"aller à l'ext": dehors, "entrer dans la Salle 2" : "interdit", "aller dans la rue" : Rue}                  
-        dehors.exits = {"retourner dans le couloir" : Couloir_1}
-        Rue.exits={"aller dans le couloir 1" : Couloir_1, "aller dans le couloir 2" : Couloir_2}
-        Couloir_2.exits={"aller dans a salle 3" :  Salle_3, "aller à l'ext": dehors, "aller dans la rue" : Rue}
+        Salle_1.exits = { "N" : Couloir_1}
+        Couloir_1.exits = {"O": dehors, "N" : "interdit", "E" : Rue}                  
+        dehors.exits = {"E" : Couloir_1}
+        Rue.exits={"O" : Couloir_1, "E" : Couloir_2}
+        Couloir_2.exits={"S" :  Salle_3, "O": dehors, "E" : Rue}
 
  #setup des pnj/monstres 
 
-        demogorgon=character("Démogorgon","grand, grosse bouche avec plein de dents", club_musique, "[je serai le président de tous les français]")
-        pnj=character("jean bomber","une personne classique",cafetaria,"[Tu veux aller où?]")
+       # demogorgon=character("Démogorgon","grand, grosse bouche avec plein de dents", club_musique, "[je serai le président de tous les français]")
+       #pnj=character("jean bomber","une personne classique",cafetaria,"[Tu veux aller où?]")
 
         # Setup player and starting roomSFS
 
         self.player = Player(input("\nEntrez votre nom: "))
         self.player.current_room = Salle_1
+        self.player.history.append(self.player.current_room)
 
     # Play the game
     def play(self):
