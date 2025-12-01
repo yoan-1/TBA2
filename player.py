@@ -28,13 +28,12 @@ class Player():
         if len(self.inventory) == 0:
             return "Votre inventaire est vide."
         
-        inventory_string = "\nVous disposez des items suivants:\n"
+        inventory_string = "\nVous disposez des items suivants :\n"
         
+        for item in self.inventory:
+            inventory_string += f"    - {item.name} : {item.description} ({item.weight} kg)\n"
         
-
-        for items in inventory_items:
-            
-            inventory_string += f"-{self.name} : {self.description} ({self.weight} kg)\n"
+        return inventory_string
 
 
 

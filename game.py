@@ -28,6 +28,8 @@ class Game:
         self.commands["quit"] = quit
         go = Command("go", " <direction> : se déplacer dans une direction cardinale (N, E, S, O)", Actions.go, 1)
         self.commands["go"] = go
+        inventory = Command("inventory", " : afficher votre inventaire", Actions.inventory, 0)
+        self.commands["inventory"] = inventory
         
         # Setup rooms
 
@@ -59,7 +61,7 @@ class Game:
 
         # Setup player and starting roomSFS
 
-        self.player = Player(input("\nEntrez votre nom: "))
+        self.player = Player(input("\nEntrez votre nom: "), [])
         self.player.current_room = Salle_1
         self.player.history.append(self.player.current_room)
 
