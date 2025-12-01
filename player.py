@@ -2,10 +2,11 @@
 class Player():
 
     # Define the constructor.
-    def __init__(self, name):
+    def __init__(self, name, inventory):
         self.name = name
         self.current_room = None
         self.history=[]
+        self.inventory = inventory
 
     def get_history(self):       
         # Si l'historique n'a qu'une seule pièce (la pièce actuelle), on ne liste rien.
@@ -22,6 +23,18 @@ class Player():
             
         return history_string
 
+    def get_inventory(self):
+        # S'il n'y a rien dans l'inventaire, on le signale.
+        if len(self.inventory) == 0:
+            return "Votre inventaire est vide."
+        
+        inventory_string = "\nVous disposez des items suivants:\n"
+        
+        
+
+        for items in inventory_items:
+            
+            inventory_string += f"-{self.name} : {self.description} ({self.weight} kg)\n"
 
 
 
