@@ -2,11 +2,12 @@
 class Player():
 
     # Define the constructor.
-    def __init__(self, name, inventory):
+    def __init__(self, name, inventory=None):
         self.name = name
         self.current_room = None
-        self.history=[]
-        self.inventory = inventory
+        self.history = []
+        # Utiliser une liste vide si aucun inventaire fourni
+        self.inventory = inventory if inventory is not None else []
 
     def get_history(self):       
         # Si l'historique n'a qu'une seule pièce (la pièce actuelle), on ne liste rien.
@@ -19,7 +20,7 @@ class Player():
         history_string = "\nVous avez déjà visité les pièces suivantes:\n"
         for room in visited_rooms:
             # Nous utilisons la description de la pièce (ex: "un marécage sombre...")
-            history_string += f"- {room.description}\n"
+            history_string += f"- {room.name}\n"
             
         return history_string
 
@@ -28,26 +29,27 @@ class Player():
         if len(self.inventory) == 0:
             return "Votre inventaire est vide."
         
-        inventory_string = "\nVous disposez des items suivants :\n"
+        inventory_string = "\nVous disposez des items suivants:\n"
         
-        for item in self.inventory:
-            inventory_string += f"    - {item.name} : {item.description} ({item.weight} kg)\n"
         
-        return inventory_string
+
+        for items in inventory_items:
+            
+            inventory_string += f"-{self.name} : {self.description} ({self.weight} kg)\n"
 
 
 
     # Define the move method.
     def move(self, direction):
         # Get the next room from the exits dictionary of the current room.
-        next_room = self.current_room.exits[direction]
+        next_room = self.current_room.exits.get(direction)
 
         # If the next room is None, print an error message and return False.
         if next_room is None:
-            print("\nAucune porte dans cette direction !\n")
+            print("\nImpossible d'aller dans cette direction !\n")
             return False    
         
-        if next_room is "interdit":
+        if next_room == "interdit":
             print("\nCette porte est fermée à clé.\n")
             return False
         
@@ -85,6 +87,26 @@ class Player():
 
         return True
     
+    def back(self):
+        if len(self.history) <= 1:
+            print("\nVous ne pouvez pas aller en arrière, vous êtes dans la première salle")
+            return False
+    
+        #retire la derniere salle de l'affichage
+        self.history.pop()
+
+        #le dernier élément de l'historique devient donc la piece actuelle
+        self.current_room=self.history[-1]
+
+        print(f"\nVous êtes revenu en arrière.")
+        print(self.current_room.get_long_description())
+
+        history_output = self.get_history()
+        if history_output:
+            print(history_output)
+
+        return True
+
     def history(self, history):
         history = []
         history.append
