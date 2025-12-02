@@ -138,6 +138,41 @@ class Actions:
         print()
         return True
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def inventory(game, list_of_words, number_of_parameters):
         """
         Display the player's inventory.
