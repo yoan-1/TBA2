@@ -2,7 +2,9 @@
 
 class Command:
     """
-    This class represents a command. A command is composed of a command word, a help string, an action and a number of parameters.
+    This class represents a command. A command is composed of a command word, a 
+    
+      string, an action and a number of parameters.
 
     Attributes:
         command_word (str): The command word.
