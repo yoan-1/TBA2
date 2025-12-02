@@ -64,6 +64,26 @@ class Player():
         if history_output:
             print(history_output)
 
+        return True
+    
+     
+    def back(self):
+        if len(self.history) <= 1:
+            print("\nVous ne pouvez pas aller en arrière, vous êtes dans la première salle")
+            return False
+    
+        #retire la derniere salle de l'affichage
+        self.history.pop()
+
+        #le dernier élément de l'historique devient donc la piece actuelle
+        self.current_room=self.history[-1]
+
+        print(f"\nVous êtes revenu en arrière.")
+        print(self.current_room.get_long_description())
+
+        history_output = self.get_history()
+        if history_output:
+            print(history_output)
 
         return True
     

@@ -137,6 +137,40 @@ class Actions:
             print("\t- " + str(command))
         print()
         return True
+
+    def back(game, list_of_words, number_of_parameters):
+        l = len(list_of_words)
+        # If the number of parameters is incorrect, print an error message and return False.
+        if l != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
+            return False
+        player = game.player
+        return player.back()
+
+    def inventory(game, list_of_words, number_of_parameters):
+        """
+        Display the player's inventory.
+
+        Args:
+            game (Game): The game object.
+            list_of_words (list): The list of words in the command.
+            number_of_parameters (int): The number of parameters expected by the command.
+
+        Returns:
+            bool: True if the command was executed successfully, False otherwise.
+
+        Examples:
+
+        >>> from game import Game
+        >>> game = Game()
+        >>> game.setup()
+        >>> inventory(game, ["inventory"], 0)
+        True
+        >>> inventory(game, ["inventory", "N"], 0)
+        False
+
+        """
     
     def back(game, list_of_words, number_of_parameters):
         l = len(list_of_words)
