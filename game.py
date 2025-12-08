@@ -48,18 +48,21 @@ class Game:
         self.rooms.append(dehors)
         Rue = Room("Rue", "dans la rue de l'ESIEE. Vous voyez une grande allée et pleins d'endroits où aller")
         self.rooms.append(Rue)
+        Cafeteria = Room
         # Create exits for rooms
 
         Salle_1.exits = { "N" : Couloir_1}
         Couloir_1.exits = {"O": dehors, "N" : "interdit", "E" : Rue}                  
         dehors.exits = {"E" : Couloir_1}
-        Rue.exits={"O" : Couloir_1, "E" : Couloir_2}
+        Rue.exits={"O" : Couloir_1, "E" : Couloir_2, "S" : Cafetaria}
         Couloir_2.exits={"S" :  Salle_3, "O": dehors, "E" : Rue}
 
  #setup des pnj/monstres 
 
-       # demogorgon=character("Démogorgon","grand, grosse bouche avec plein de dents", club_musique, "[je serai le président de tous les français]")
-       #pnj=character("jean bomber","une personne classique",cafetaria,"[Tu veux aller où?]")
+
+
+        demogorgon=character("Démogorgon","grand, grosse bouche avec plein de dents", club_musique, "[je serai le président de tous les français]")
+        pnj=character("jean bomber","une personne classique",Cafetaria,"[Tu veux aller où?]")
 
         # Setup player and starting roomSFS
 
