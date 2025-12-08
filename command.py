@@ -7,6 +7,7 @@ class Command:
     Attributes:
         command_word (str): The command word.
         help_string (str): The help string.
+    
         action (function): The action to execute when the command is called.
         number_of_parameters (int): The number of parameters expected by the command.
 

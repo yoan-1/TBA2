@@ -7,7 +7,11 @@ class Player():
         self.current_room = None
         self.history = []
         # Utiliser une liste vide si aucun inventaire fourni
+<<<<<<< HEAD:__pycache__/player.py
         self.inventory = inventory if inventory is not None else []
+=======
+        self.inventory ={}
+>>>>>>> louis:player.py
 
     def get_history(self):       
         # Si l'historique n'a qu'une seule pièce (la pièce actuelle), on ne liste rien.
@@ -22,7 +26,7 @@ class Player():
             # Nous utilisons la description de la pièce (ex: "un marécage sombre...")
             history_string += f"- {room.name}\n"
             
-        return history_string
+        return history_string 
 
     def get_inventory(self):
         # S'il n'y a rien dans l'inventaire, on le signale.
@@ -39,7 +43,7 @@ class Player():
 
 
 
-    # Define the move method.
+    # Define the move method.Vous ne pouvez p
     def move(self, direction):
         # Get the next room from the exits dictionary of the current room.
         next_room = self.current_room.exits.get(direction)
@@ -69,7 +73,7 @@ class Player():
      
     def back(self):
         if len(self.history) <= 1:
-            print("\nVous ne pouvez pas aller en arrière, vous êtes dans la première salle")
+            print("\nas aller en arrière, vous êtes dans la première salle")
             return False
     
         #retire la derniere salle de l'affichage
@@ -86,6 +90,7 @@ class Player():
             print(history_output)
 
         return True
+<<<<<<< HEAD:__pycache__/player.py
     
     def back(self):
         if len(self.history) <= 1:
@@ -106,6 +111,9 @@ class Player():
             print(history_output)
 
         return True
+=======
+
+>>>>>>> louis:player.py
 
     def history(self, history):
         history = []
