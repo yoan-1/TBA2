@@ -66,7 +66,8 @@ class Game:
         Rue.exits = {"O" : Couloir_1, "E" : Couloir_2, "S" : Cafeteria}
         Couloir_2.exits = {"S" :  Salle_3, "O": dehors, "E" : Rue}
         Cafeteria.exists = {"N" : Rue}
-        Escaliers1.exits = 
+        Escaliers1.exits = {"E" :  Club_musique}
+        Escaliers2.exits = {"E" :  Club_musique}
 
         # Setup player and starting roomSFS
 

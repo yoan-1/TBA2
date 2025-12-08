@@ -7,11 +7,7 @@ class Player():
         self.current_room = None
         self.history = []
         # Utiliser une liste vide si aucun inventaire fourni
-<<<<<<< HEAD:__pycache__/player.py
-        self.inventory = inventory if inventory is not None else []
-=======
         self.inventory ={}
->>>>>>> louis:player.py
 
     def get_history(self):       
         # Si l'historique n'a qu'une seule pièce (la pièce actuelle), on ne liste rien.
@@ -67,13 +63,15 @@ class Player():
         history_output = self.get_history()
         if history_output:
             print(history_output)
+        
+        
 
         return True
     
      
     def back(self):
         if len(self.history) <= 1:
-            print("\nas aller en arrière, vous êtes dans la première salle")
+            print("\nvous ne pouvez pas aller en arrière, vous êtes dans la première salle")
             return False
     
         #retire la derniere salle de l'affichage
@@ -90,30 +88,6 @@ class Player():
             print(history_output)
 
         return True
-<<<<<<< HEAD:__pycache__/player.py
-    
-    def back(self):
-        if len(self.history) <= 1:
-            print("\nVous ne pouvez pas aller en arrière, vous êtes dans la première salle")
-            return False
-    
-        #retire la derniere salle de l'affichage
-        self.history.pop()
-
-        #le dernier élément de l'historique devient donc la piece actuelle
-        self.current_room=self.history[-1]
-
-        print(f"\nVous êtes revenu en arrière.")
-        print(self.current_room.get_long_description())
-
-        history_output = self.get_history()
-        if history_output:
-            print(history_output)
-
-        return True
-=======
-
->>>>>>> louis:player.py
 
     def history(self, history):
         history = []
