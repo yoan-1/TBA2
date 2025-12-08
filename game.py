@@ -44,25 +44,28 @@ class Game:
         self.rooms.append(Couloir_1)
         Couloir_2 =  Room("couloir 2", "dans le Couloir 2. Vous voyez des portes tout autour de vous.")
         self.rooms.append(Couloir_2)
-        dehors = Room("dehors", "dehors.  ressant ici...")
+        dehors = Room("dehors", "dehors. Il n'y a rien d'interessant ici...")
         self.rooms.append(dehors)
         Rue = Room("Rue", "dans la rue de l'ESIEE. Vous voyez une grande allée et pleins d'endroits où aller")
         self.rooms.append(Rue)
-        Cafeteria = Room
+        Cafeteria = Room("Cafetaria","dans la cafétaria. Il y a un étudiant en face de vous.")
+        self.rooms.append(Cafeteria)
+        Escaliers1 = Room("Escaliers","dans les escaliers. Vous voyez un parking mais également le lieu du club musique")
+        self.rooms.append(Escaliers1)
+        Escaliers2 = Room("Escaliers","dans les escaliers. Vous vous trouvez dans le couloir 2")
+        self.rooms.append(Escaliers2)
+        Club_musique = Room("Club_musique", "arrivé au club musique. Après avoir refermé la porte, l'ambiance semble devenir étrange")
+        self.rooms.append(Club_musique)
+
         # Create exits for rooms
 
         Salle_1.exits = { "N" : Couloir_1}
         Couloir_1.exits = {"O": dehors, "N" : "interdit", "E" : Rue}                  
         dehors.exits = {"E" : Couloir_1}
-        Rue.exits={"O" : Couloir_1, "E" : Couloir_2, "S" : Cafetaria}
-        Couloir_2.exits={"S" :  Salle_3, "O": dehors, "E" : Rue}
-
- #setup des pnj/monstres 
-
-
-
-        demogorgon=character("Démogorgon","grand, grosse bouche avec plein de dents", club_musique, "[je serai le président de tous les français]")
-        pnj=character("jean bomber","une personne classique",Cafetaria,"[Tu veux aller où?]")
+        Rue.exits = {"O" : Couloir_1, "E" : Couloir_2, "S" : Cafeteria}
+        Couloir_2.exits = {"S" :  Salle_3, "O": dehors, "E" : Rue}
+        Cafeteria.exists = {"N" : Rue}
+        Escaliers1.exits = 
 
         # Setup player and starting roomSFS
 

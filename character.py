@@ -14,8 +14,10 @@ def __str__(self):
         return f"{self.name}: {self.description}, current_room, {self.msgs}"
 
 if __name__ == "__main__":
-    PNJ = character("PNJ", "un étudiant souriant", "La Rue", ["Salut à toi !"])
-    print(PNJ)
+        demogorgon=character("Démogorgon","grand, grosse bouche avec plein de dents", "club_musique", "[je serai le président de tous les français]")
+        pnj=character("jean bomber","une personne classique","Cafetaria","[Tu veux aller où?]")    
+        print(demogorgon)
+        print(pnj)
 
 
 
