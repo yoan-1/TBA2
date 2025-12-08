@@ -30,7 +30,8 @@ class Game:
         self.commands["go"] = go
         inventory = Command("inventory", " : afficher votre inventaire", Actions.inventory, 0)
         self.commands["inventory"] = inventory
-        
+        back = Command("back"," : revenir en arrière", Actions.back, 0)
+        self.commands["back"] = back
         # Setup rooms
 
        
