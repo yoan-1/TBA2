@@ -30,6 +30,9 @@ class Game:
         self.commands["go"] = go
         back = Command("back"," : revenir en arrière", Actions.back, 0)
         self.commands["back"] = back
+        inventory = Command("inventory", " : afficher votre inventaire", Actions.inventory, 0)
+        self.commands["inventory"] = inventory
+        
         # Setup rooms
 
        
@@ -60,7 +63,7 @@ class Game:
 
         # Setup player and starting roomSFS
 
-        self.player = Player(input("\nEntrez votre nom: "))
+        self.player = Player(input("\nEntrez votre nom: "), [])
         self.player.current_room = Salle_1
         self.player.history.append(self.player.current_room)
 

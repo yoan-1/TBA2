@@ -171,13 +171,14 @@ class Actions:
         False
 
         """
-    
-    def back(game, list_of_words, number_of_parameters):
         l = len(list_of_words)
         # If the number of parameters is incorrect, print an error message and return False.
         if l != number_of_parameters + 1:
             command_word = list_of_words[0]
             print(MSG0.format(command_word=command_word))
             return False
+        
+        # Display the player's inventory.
         player = game.player
-        return player.back()
+        print(player.get_inventory())
+        return True

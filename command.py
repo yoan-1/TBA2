@@ -2,13 +2,12 @@
 
 class Command:
     """
-    This class represents a command. A command is composed of a command word, a 
-    
-      string, an action and a number of parameters.
+    This class represents a command. A command is composed of a command word, a help string, an action and a number of parameters.
 
     Attributes:
         command_word (str): The command word.
         help_string (str): The help string.
+    
         action (function): The action to execute when the command is called.
         number_of_parameters (int): The number of parameters expected by the command.
 
