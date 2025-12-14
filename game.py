@@ -64,7 +64,7 @@ class Game:
         # Ajouter un item 'clé' dans la pièce 'dehors'
         dehors.inventory['key'] = Item('key', 'une clé en fer', 0.1)
         Salle_1.inventory['consignes'] = Item('consignes', "Une feuille avec des consignes pour bien débuter la course d'orientation", 0.2)
-        Salle_3.inventory['survêt'] = Item('survêt', 'Le survêtement rouge de Louis tarh le tripaloski et les années 80', 0.2)
+        Salle_3.inventory['survêt'] = Item('survêt', 'Le survêtement rouge de Louis tahhh le tripaloski et les années 80', 0.2)
 
         # Create exits for rooms
 
