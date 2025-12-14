@@ -182,3 +182,190 @@ class Actions:
         player = game.player
         print(player.get_inventory())
         return True
+
+    def look(game, list_of_words, number_of_parameters):
+        """
+        Affiche le contenu de la pièce courante (items présents).
+        """
+        l = len(list_of_words)
+        if l != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
+            return False
+
+        player = game.player
+        current_room = player.current_room
+        if current_room is None:
+            print("Il n'y a rien ici.")
+            return False
+
+        print(current_room.get_inventory())
+        return True
+
+    def history(game, list_of_words, number_of_parameters):
+        """Affiche l'historique des salles visitées par le joueur."""
+        l = len(list_of_words)
+        if l != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
+            return False
+
+        player = game.player
+        history_output = player.get_history()
+        if history_output:
+            print(history_output)
+        return True
+    #Prend un item
+    def _take_simple(game, list_of_words):
+    
+        
+        if len(list_of_words) < 2:
+            print("\nOups.. réessaies encore !\n")
+            return False
+
+        item_name = list_of_words[1]
+        player = game.player
+        current_room = player.current_room
+
+        if current_room is None:
+            print("\nIl n'y a rien ici.\n")
+            return False
+
+        if not getattr(current_room, 'inventory', {}) or item_name not in current_room.inventory:
+            print(f"\nIl n'y a pas d'item nommé '{item_name}' ici.\n")
+            return False
+
+        # Déplacer l'item de la pièce vers l'inventaire du joueur
+        item = current_room.inventory.pop(item_name)
+        if player.inventory is None:
+            player.inventory = {}
+        player.inventory[item_name] = item
+        print(f"\nVous avez pris l'item '{item_name}'.\n")
+        return True
+    #repose un item
+    def _drop_simple(game, list_of_words):
+        
+        if len(list_of_words) < 2:
+            print("\nOups.. réessaies encore !\n")
+            return False
+
+        item_name = list_of_words[1]
+        player = game.player
+        current_room = player.current_room
+
+        if player.inventory is None or item_name not in player.inventory:
+            print(f"\nVous n'avez pas d'item nommé '{item_name}'.\n")
+            return False
+
+        # Retirer de l'inventaire du joueur et ajouter à la pièce
+        item = player.inventory.pop(item_name)
+        if current_room is None:
+            print("\nIl n'y a pas de pièce ici pour déposer l'item.\n")
+            return False
+
+        if getattr(current_room, 'inventory', None) is None:
+            current_room.inventory = {}
+        current_room.inventory[item_name] = item
+        print(f"\nVous avez déposé l'item '{item_name}' ici.\n")
+        return True
+
+    # Wrappers compatibles avec l'API existante (game, list_of_words, number_of_parameters)
+    def take(game, list_of_words, number_of_parameters=None):
+        return Actions._take_simple(game, list_of_words)
+
+    def drop(game, list_of_words, number_of_parameters=None):
+        return Actions._drop_simple(game, list_of_words)
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

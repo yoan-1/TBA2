@@ -7,6 +7,7 @@ from player import Player
 from command import Command
 from actions import Actions
 from character import character
+from item import Item
 class Game:
 
     # Constructor
@@ -28,25 +29,43 @@ class Game:
         self.commands["quit"] = quit
         go = Command("go", " <direction> : se déplacer dans une direction cardinale (N, E, S, O)", Actions.go, 1)
         self.commands["go"] = go
-        inventory = Command("inventory", " : afficher votre inventaire", Actions.inventory, 0)
-        self.commands["inventory"] = inventory
-        back = Command("back"," : revenir en arrière", Actions.back, 0)
+        check = Command("check", " : afficher votre inventaire", Actions.inventory, 0)
+        self.commands["check"] = check
+        back = Command("back"," : Vous permet de revenir en arrière si et seulement si vous êtes bloqué", Actions.back, 0)
         self.commands["back"] = back
+        look = Command("look"," : regarder autour de soi", Actions.look, 0) 
+        self.commands["look"] = look
+        take = Command("take", " <item> : prendre un item présent dans la pièce", Actions.take, 1)
+        self.commands["take"] = take
+        drop = Command("drop", " <item> : reposer un item depuis votre inventaire", Actions.drop, 1)
+        self.commands["drop"] = drop
+        history = Command("history", " : afficher les pièces déjà visitées", Actions.history, 0)
+        self.commands["history"] = history
+        
         # Setup rooms
 
        
         Salle_1 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !")
         self.rooms.append(Salle_1)
-        Salle_3 = Room("Salle 3", "dans la Salle 3. Il n'y a rien d'interressant ici...")
+        Salle_3 = Room("Salle 3", "dans la Salle 3.")
         self.rooms.append(Salle_3)
         Couloir_1 = Room("Couloir 1", "dans le Couloir 1. Vous voyez des portes tout autour de vous.")
         self.rooms.append(Couloir_1)
         Couloir_2 =  Room("couloir 2", "dans le Couloir 2. Vous voyez des portes tout autour de vous.")
         self.rooms.append(Couloir_2)
-        dehors = Room("dehors", "dehors.  ressant ici...")
+        dehors = Room("dehors", "dehors")
         self.rooms.append(dehors)
         Rue = Room("Rue", "dans la rue de l'ESIEE. Vous voyez une grande allée et pleins d'endroits où aller")
         self.rooms.append(Rue)
+
+        ############    ITEMS    ############Le poids est à défininir
+        #####################################On peut dire qu'à partir d'un certain poids, il est trop lourd pour échanper au monstre.
+        #####################################Et par exemple avec un item en particulier il gagne en vitesse/force donc n'a plus ce problème
+        # Ajouter un item 'clé' dans la pièce 'dehors'
+        dehors.inventory['key'] = Item('key', 'une clé en fer', 0.1)
+        Salle_1.inventory['consignes'] = Item('consignes', "Une feuille avec des consignes pour bien débuter la course d'orientation", 0.2)
+        Salle_3.inventory['survêt'] = Item('survêt', 'Le survêtement rouge de Louis tarh le tripaloski et les années 80', 0.2)
+
         # Create exits for rooms
 
         Salle_1.exits = { "N" : Couloir_1}
@@ -54,15 +73,15 @@ class Game:
         dehors.exits = {"E" : Couloir_1}
         Rue.exits={"O" : Couloir_1, "E" : Couloir_2}
         Couloir_2.exits={"S" :  Salle_3, "O": dehors, "E" : Rue}
-
- #setup des pnj/monstres 
+        Salle_3.exits={"N" : Couloir_2} 
+    #setup des pnj/monstres 
 
        # demogorgon=character("Démogorgon","grand, grosse bouche avec plein de dents", club_musique, "[je serai le président de tous les français]")
        #pnj=character("jean bomber","une personne classique",cafetaria,"[Tu veux aller où?]")
 
         # Setup player and starting roomSFS
 
-        self.player = Player(input("\nEntrez votre nom: "), [])
+        self.player = Player(input("\nEntrez votre nom: "), {})
         self.player.current_room = Salle_1
         self.player.history.append(self.player.current_room)
 
