@@ -6,23 +6,22 @@ class Player():
         self.name = name
         self.current_room = None
         self.history = []
-        # Utiliser une liste vide si aucun inventaire fourni
-        self.inventory ={}
+        # Inventory: dictionnaire item_name -> Item instance
+        self.inventory = {} if inventory is None else inventory
 
     def get_history(self):       
         # Si l'historique n'a qu'une seule pièce (la pièce actuelle), on ne liste rien.
         if len(self.history) <= 1:
             return ""
-
+    
         # Exclure la dernière pièce (qui est la pièce actuelle)
         visited_rooms = self.history[:-1] 
-
+     
         history_string = "\nVous avez déjà visité les pièces suivantes:\n"
         for room in visited_rooms:
             # Nous utilisons la description de la pièce (ex: "un marécage sombre...")
             history_string += f"- {room.name}\n"
-            
-        return history_string 
+        return history_string
 
     def get_inventory(self):
         # S'il n'y a rien dans l'inventaire, on le signale.
@@ -30,16 +29,13 @@ class Player():
             return "Votre inventaire est vide."
         
         inventory_string = "\nVous disposez des items suivants:\n"
-        
-        
-
-        for items in inventory_items:
-            
-            inventory_string += f"-{self.name} : {self.description} ({self.weight} kg)\n"
+        for item in self.inventory.values():
+            inventory_string += f"    - {item.name} : {item.description} ({item.weight} kg)\n"
+        return inventory_string
 
 
 
-    # Define the move method.Vous ne pouvez p
+    # Define the move method.
     def move(self, direction):
         # Get the next room from the exits dictionary of the current room.
         next_room = self.current_room.exits.get(direction)
@@ -59,19 +55,16 @@ class Player():
         self.history.append(self.current_room)
         
         print(self.current_room.get_long_description())
-
-        history_output = self.get_history()
-        if history_output:
-            print(history_output)
-        
-        
+#
+   #     history_output = self.get_history()
+   #     if history_output:
+   #         print(history_output)
 
         return True
     
-     
     def back(self):
         if len(self.history) <= 1:
-            print("\nvous ne pouvez pas aller en arrière, vous êtes dans la première salle")
+            print("\nVous ne pouvez pas aller en arrière, vous êtes dans la première salle")
             return False
     
         #retire la derniere salle de l'affichage
