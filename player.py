@@ -12,7 +12,7 @@ class Player():
     def get_history(self):       
         # Si l'historique n'a qu'une seule pièce (la pièce actuelle), on ne liste rien.
         if len(self.history) <= 1:
-            return ""
+            return "tu es toujours dans la pièce de départ !"
     
         # Exclure la dernière pièce (qui est la pièce actuelle)
         visited_rooms = self.history[:-1] 
