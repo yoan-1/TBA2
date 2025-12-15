@@ -6,7 +6,8 @@ from room import Room
 from player import Player
 from command import Command
 from actions import Actions
-from character import character
+# CORRECTION D'IMPORTATION : La classe se nomme character, pas Character
+from character import character 
 from item import Item
 class Game:
 
@@ -31,7 +32,7 @@ class Game:
         self.commands["go"] = go
         check = Command("check", " : afficher votre inventaire", Actions.inventory, 0)
         self.commands["check"] = check
-        back = Command("back"," : Vous permet de revenir en arrière si et seulement si vous êtes bloqué", Actions.back, 0)
+        back = Command("back"," : Vous permet de revenir en arrière", Actions.back, 0)
         self.commands["back"] = back
         look = Command("look"," : regarder autour de soi", Actions.look, 0) 
         self.commands["look"] = look
@@ -44,40 +45,58 @@ class Game:
         
         # Setup rooms
 
-       
+        
         Salle_1 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !")
         self.rooms.append(Salle_1)
         Salle_3 = Room("Salle 3", "dans la Salle 3.")
         self.rooms.append(Salle_3)
         Couloir_1 = Room("Couloir 1", "dans le Couloir 1. Vous voyez des portes tout autour de vous.")
         self.rooms.append(Couloir_1)
-        Couloir_2 =  Room("couloir 2", "dans le Couloir 2. Vous voyez des portes tout autour de vous.")
+        Couloir_2 = Room("couloir 2", "dans le Couloir 2. Vous voyez des portes tout autour de vous.")
         self.rooms.append(Couloir_2)
         dehors = Room("dehors", "dehors")
         self.rooms.append(dehors)
         Rue = Room("Rue", "dans la rue de l'ESIEE. Vous voyez une grande allée et pleins d'endroits où aller")
         self.rooms.append(Rue)
+        Cafeteria = Room("Cafétéria", "dans la cafétéria. Il y a plein de tables et de chaises ici ainsi qu'une personne")
+        self.rooms.append(Cafeteria)
+        Club_musique = Room("Club musique", "dans le club de musique. Une ambiance étrange survient...") 
+        self.rooms.append(Club_musique) 
 
-        ############    ITEMS    ############Le poids est à défininir
-        #####################################On peut dire qu'à partir d'un certain poids, il est trop lourd pour échanper au monstre.
-        #####################################Et par exemple avec un item en particulier il gagne en vitesse/force donc n'a plus ce problème
+        # ############   ITEMS   ############
+        # Le poids est à définir
         # Ajouter un item 'clé' dans la pièce 'dehors'
         dehors.inventory['key'] = Item('key', 'une clé en fer', 0.1)
         Salle_1.inventory['consignes'] = Item('consignes', "Une feuille avec des consignes pour bien débuter la course d'orientation", 0.2)
-        Salle_3.inventory['survêt'] = Item('survêt', 'Le survêtement rouge de Louis tahhh le tripaloski et les années 80', 0.2)
+        Salle_3.inventory['survêt'] = Item('survêt', 'On voit le survêtement rouge de Louis tahhh le tripaloski et les années 80', 0.2)
 
         # Create exits for rooms
 
         Salle_1.exits = { "N" : Couloir_1}
-        Couloir_1.exits = {"O": dehors, "N" : "interdit", "E" : Rue}                  
+        Couloir_1.exits = {"O": dehors, "N" : "interdit", "E" : Rue}             
         dehors.exits = {"E" : Couloir_1}
-        Rue.exits={"O" : Couloir_1, "E" : Couloir_2}
-        Couloir_2.exits={"S" :  Salle_3, "O": dehors, "E" : Rue}
+        Rue.exits={"O" : Couloir_1, "E" : Couloir_2, "S" : Cafeteria}
+        Couloir_2.exits={"S" : Salle_3, "O": dehors, "E" : Rue}
         Salle_3.exits={"N" : Couloir_2} 
-    #setup des pnj/monstres 
+        Cafeteria.exits={"N" : Rue} 
+        Club_musique.exits={"W" : Rue} 
 
-       # demogorgon=character("Démogorgon","grand, grosse bouche avec plein de dents", club_musique, "[je serai le président de tous les français]")
-       #pnj=character("jean bomber","une personne classique",cafetaria,"[Tu veux aller où?]")
+
+        # ############ SETUP DES PNJ/MONSTRES ############
+        
+        # NOTE : current_room doit être défini plus tard lors du placement
+        demogorgon = character("Démogorgon", "grand, grosse bouche avec plein de dents", None, ["Je serai le président de tous les français"])
+        jean_bomber = character("jean bomber", "une personne classique", None, ["Tu veux aller où?"])
+
+        # PLACEMENT DES PNJClub_musique
+        # Place le Démogorgon dans le Couloir 1
+        Club_musique.characters[demogorgon.name.lower()] = Club_musique.demogorgon
+        demogorgon.current_room = Club_musique
+        
+        # Place Jean Bomber dans la Rue
+        Cafeteria.characters[jean_bomber.name.lower()] = Cafeteria
+        jean_bomber.current_room = Cafeteria
+
 
         # Setup player and starting roomSFS
 
@@ -101,10 +120,16 @@ class Game:
         # Split the command string into a list of words
         list_of_words = command_string.split(" ")
 
-        command_word = list_of_words[0]
+        # Assurer que command_word n'est pas vide
+        if not list_of_words or not list_of_words[0]:
+             return None
+             
+        command_word = list_of_words[0].lower()
 
         # If the command is not recognized, print an error message
         if command_word not in self.commands.keys():
+            # Ajout du message d'erreur
+            print(f"\nCommande '{command_word}' non reconnue. Entrez 'help' pour voir la liste des commandes disponibles.\n")
             return None
             
         # If the command is recognized, execute it
