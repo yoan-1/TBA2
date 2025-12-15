@@ -10,7 +10,7 @@ class Room:
         self.name = name
         self.description = description
         self.exits = {}
-        self.character = {}
+        self.characters = {}
         # Inventory: dictionnaire item_name -> Item instance
         self.inventory = {}
 
@@ -32,14 +32,19 @@ class Room:
         return f"\nVous êtes {self.description}\n\n{self.get_exit_string()}\n"
 
     def get_inventory(self):
-        # S'il n'y a rien dans l'inventaire, on le signale.
-        if len(self.inventory) == 0:
-            return "Il n'y a rien ici."
-        inventory_string = "\nOn observe les alentours... on voit : \n"
+        content_lines = []
+    # 1. Lister les ITEMS
         for item in self.inventory.values():
-            inventory_string += f"    - {item.name} : {item.description} ({item.weight} kg)\n"
-        return inventory_string
+            # Utilise __str__ de Item : "- nom : description (poids kg)"
+            content_lines.append(f"- {item}") 
 
-    def look(self):
-        """Affiche le contenu de la pièce."""
-        print(self.get_inventory())
+        # 2. Lister les PERSONNAGES
+        # Utilise l'attribut characters corrigé
+        for pnj in self.characters.values():
+            # Utilise __str__ de Character : "- Nom : description"
+            content_lines.append(f"-on voit : {pnj}")
+
+        if not content_lines:
+            return "Il n'y a rien ici."
+            
+        return "\n".join(content_lines)
