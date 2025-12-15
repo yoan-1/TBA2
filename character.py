@@ -1,4 +1,5 @@
 # Fichier character.py (Corrigé)
+import random
 
 class character :
 #permet de représenter des PNJ, ou tout type d'être qui ne sont pas le personnage personnage

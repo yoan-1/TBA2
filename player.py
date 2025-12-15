@@ -1,4 +1,5 @@
 # Define the Player class.
+from game import DEBUG
 class Player():
 
     # Define the constructor.
@@ -40,9 +41,14 @@ class Player():
         # Get the next room from the exits dictionary of the current room.
         next_room = self.current_room.exits.get(direction)
 
+        if DEBUG:
+            print(print(f"DEBUG: Tentative de déplacement de {self.current_room.name} vers {direction}."))
+
         # If the next room is None, print an error message and return False.
         if next_room is None:
             print("\nImpossible d'aller dans cette direction !\n")
+            if DEBUG:
+                print("DEBUG: Déplacement échoué car direction inconnue.")
             return False    
         
         if next_room == "interdit":
@@ -53,6 +59,8 @@ class Player():
         self.current_room = next_room
 
         self.history.append(self.current_room)
+
+        if 
         
         print(self.current_room.get_long_description())
 #
