@@ -62,6 +62,12 @@ class Game:
         self.rooms.append(Cafeteria)
         Club_musique = Room("Club musique", "dans le club de musique. Une ambiance étrange survient...") 
         self.rooms.append(Club_musique) 
+        Escaliers1= Room("Escalier 1", "dans l'escalier 1.")
+        self.rooms.append(Escaliers1)
+        Escaliers2= Room("Escalier 2", "dans l'escalier 2.")
+        self.rooms.append(Escaliers2)
+        Parking= Room("Parking", "sur le parking. Vous voyez des voitures garées un peu partout.")
+        self.rooms.append(Parking) 
 
         # ############   ITEMS   ############
         # Le poids est à définir
@@ -73,14 +79,16 @@ class Game:
         # Create exits for rooms
 
         Salle_1.exits = { "N" : Couloir_1}
-        Couloir_1.exits = {"O": dehors, "N" : "interdit", "E" : Rue}             
+        Couloir_1.exits = {"O": dehors, "N" : "interdit", "E" : Rue, "S" : Escaliers1}             
         dehors.exits = {"E" : Couloir_1}
         Rue.exits={"O" : Couloir_1, "E" : Couloir_2, "S" : Cafeteria}
-        Couloir_2.exits={"S" : Salle_3, "O": dehors, "E" : Rue}
+        Couloir_2.exits={"N" : Salle_3, "O": dehors, "E" : Rue, "S" : Escaliers2}
         Salle_3.exits={"N" : Couloir_2} 
         Cafeteria.exits={"N" : Rue} 
-        Club_musique.exits={"W" : Rue} 
-
+        Club_musique.exits={"W" : Rue}
+        Escaliers1.exits={"N" : Couloir_1}
+        Escaliers2.exits={"N" : Couloir_2}  
+        Parking.exits={"N" : Rue}
 
         # ############ SETUP DES PNJ/MONSTRES ############
         
