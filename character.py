@@ -1,4 +1,5 @@
 import random
+from game import DEBUG
 
 class character :
 #permet de représenter des PNJ, ou tout type d'être qui ne sont pas le personnage personnage
@@ -28,12 +29,35 @@ class character :
         return f"\nVous êtes en face de {self.description}.\n"
     
     def move(self):
-        possible_exits=[]
+        if random.choice([True, False]):
+           
+            possible_exits=[]
        #On regarde quelles sont les sorties possibles de la salle ds lequel est le PNJ
-        for exit_room in self.current_room.exits.values():
-            if exit_room is not None and exit_room is not "interdit":
-                possible_exits.append(exit_room)
+            for exit_room in self.current_room.exits.values():
+                if exit_room is not None and exit_room is not "interdit":
+                    possible_exits.append(exit_room)
        #Le pnj peut se deplacer dans les salles de possible_exits 
+            if possible_exits:
+                old_room = self.current_room
+                new_room = random.choice(possible_exits)
+
+                if self.name.lower() in old_room.characters:
+                    del old_room.characters[self.name.lower()]
+
+                new_room.characters[self.name.lower()] = self
+
+                self.current_room= new_room
+
+                return True
+            if DEBUG:
+                print(f"DEBUG: {self.name} s'est déplacé de {old_room.name} vers {new_room.name}")
+            return True
+        else:
+            if DEBUG:
+                print(f"DEBUG: {self.name} est resté dans {self.current_room.name}")
+            return False
+        return False
+
 
 
 
