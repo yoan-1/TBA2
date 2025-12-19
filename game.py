@@ -9,8 +9,6 @@ from actions import Actions
 # CORRECTION D'IMPORTATION : La classe se nomme character, pas Character
 from character import character 
 from item import Item
-from game import DEBUG
-DEBUG  = True
 class Game:
 
     # Constructor
@@ -62,7 +60,7 @@ class Game:
         self.rooms.append(Rue)
         Cafeteria = Room("Cafétéria", "dans la cafétéria. Il y a plein de tables et de chaises ici ainsi qu'une personne")
         self.rooms.append(Cafeteria)
-        Club_musique = Room("Club musique", "dans le club de musique. Une ambiance étrange survient...Regardez autour de vous!") 
+        Club_musique = Room("Club musique", "dans le club de musique. Une ambiance étrange survient...") 
         self.rooms.append(Club_musique) 
         Escaliers1= Room("Escalier 1", "dans l'escalier 1.")
         self.rooms.append(Escaliers1)
@@ -90,7 +88,7 @@ class Game:
         Club_musique.exits={"W" : Rue}
         Escaliers1.exits={"N" : Couloir_1, "S" : Parking}
         Escaliers2.exits={"N" : Couloir_2, "S" : Parking}  
-        Parking.exits={"N" : Escaliers2, "O" : Escaliers1, "S" : Club_musique}
+        Parking.exits={"N" : Escaliers1, "O" : Escaliers2, "S" : Club_musique}
 
         # ############ SETUP DES PNJ/MONSTRES ############
         
@@ -100,11 +98,11 @@ class Game:
 
         # PLACEMENT DES PNJClub_musique
         # Place le Démogorgon dans le Couloir 1
-        Club_musique.characters[demogorgon.name.lower()] =demogorgon
+        Club_musique.characters[demogorgon.name.lower()] = demogorgon
         demogorgon.current_room = Club_musique
         
         # Place Jean Bomber dans la Rue
-        Cafeteria.characters[jean_bomber.name.lower()] = Cafeteria
+        Cafeteria.characters[jean_bomber.name.lower()] = jean_bomber
         jean_bomber.current_room = Cafeteria
 
 

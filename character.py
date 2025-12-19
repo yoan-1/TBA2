@@ -1,4 +1,3 @@
-# Fichier character.py (Corrigé)
 import random
 
 class character :
@@ -27,6 +26,15 @@ class character :
         Retourne une description du personnage pour un affichage dans le jeu.
         """
         return f"\nVous êtes en face de {self.description}.\n"
+    
+    def move(self):
+        possible_exits=[]
+       #On regarde quelles sont les sorties possibles de la salle ds lequel est le PNJ
+        for exit_room in self.current_room.exits.values():
+            if exit_room is not None and exit_room is not "interdit":
+                possible_exits.append(exit_room)
+       #Le pnj peut se deplacer dans les salles de possible_exits 
+
 
 
 if __name__ == "__main__":

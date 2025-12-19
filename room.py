@@ -1,50 +1,93 @@
-# Define the Room class.
+# Define the Player class.
+class Player():
 
-
-
-    
-
-class Room:
-
-    def __init__(self, name, description):
+    # Define the constructor.
+    def __init__(self, name, inventory=None):
         self.name = name
-        self.description = description
-        self.exits = {}
-        self.characters = {}
+        self.current_room = None
+        self.history = []
         # Inventory: dictionnaire item_name -> Item instance
-        self.inventory = {}
+        self.inventory = {} if inventory is None else inventory
 
-    def get_exit(self, direction):
-        if direction in self.exits.keys():
-            return self.exits[direction]
-        else:
-            return None
-
-    def get_exit_string(self):
-        exit_string = "Vos choix possibles sont : "
-        for exit in self.exits.keys():
-            if self.exits.get(exit) is not None:
-                exit_string += exit + ", "
-        exit_string = exit_string.strip(", ")
-        return exit_string
-
-    def get_long_description(self):
-        return f"\nVous êtes {self.description}\n\n{self.get_exit_string()}\n"
+    def get_history(self):       
+        # Si l'historique n'a qu'une seule pièce (la pièce actuelle), on ne liste rien.
+        if len(self.history) <= 1:
+            return "tu es toujours dans la pièce de départ!"
+    
+        # Exclure la dernière pièce (qui est la pièce actuelle)
+        visited_rooms = self.history[:-1] 
+     
+        history_string = "\nVous avez déjà visité les pièces suivantes:\n"
+        for room in visited_rooms:
+            # Nous utilisons la description de la pièce (ex: "un marécage sombre...")
+            history_string += f"- {room.name}\n"
+        return history_string
 
     def get_inventory(self):
-        content_lines = []
-    # 1. Lister les ITEMS
+        # S'il n'y a rien dans l'inventaire, on le signale.
+        if len(self.inventory) == 0:
+            return "Votre inventaire est vide."
+        
+        inventory_string = "\nVous disposez des items suivants:\n"
         for item in self.inventory.values():
-            # Utilise __str__ de Item : "- nom : description (poids kg)"
-            content_lines.append(f"- {item}") 
+            inventory_string += f"    - {item.name} : {item.description} ({item.weight} kg)\n"
+        return inventory_string
 
-        # 2. Lister les PERSONNAGES
-        # Utilise l'attribut characters corrigé
-        for pnj in self.characters.values():
-            # Utilise __str__ de Character : "- Nom : description"
-            content_lines.append(f"-on voit : {pnj}")
 
-        if not content_lines:
-            return "Il n'y a rien ici."
-            
-        return "\n".join(content_lines)
+
+    # Define the move method.
+    def move(self, direction):
+        # Get the next room from the exits dictionary of the current room.
+        next_room = self.current_room.exits.get(direction)
+
+        # If the next room is None, print an error message and return False.
+        if next_room is None:
+            print("\nImpossible d'aller dans cette direction !\n")
+            return False    
+        
+        if next_room == "interdit":
+            print("\nCette porte est fermée à clé.\n")
+            return False
+        
+        # Set the current room to the next room.
+        self.current_room = next_room
+
+        self.history.append(self.current_room)
+        
+        print(self.current_room.get_long_description())
+#
+   #     history_output = self.get_history()
+   #     if history_output:
+   #         print(history_output)
+
+        return True
+    
+    def back(self):
+        if len(self.history) <= 1:
+            print("\nVous ne pouvez pas aller en arrière, vous êtes dans la première salle")
+            return False
+    
+        #retire la derniere salle de l'affichage
+        self.history.pop()
+
+        #le dernier élément de l'historique devient donc la piece actuelle
+        self.current_room=self.history[-1]
+
+        print(f"\nVous êtes revenu en arrière.")
+        print(self.current_room.get_long_description())
+
+        history_output = self.get_history()
+        if history_output:
+            print(history_output)
+
+        return True
+
+    def history(self, history):
+        history = []
+        history.append
+
+
+        
+
+
+        
