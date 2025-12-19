@@ -1,5 +1,5 @@
 import random
-from game import DEBUG
+DEBUG = True
 
 class character :
 #permet de représenter des PNJ, ou tout type d'être qui ne sont pas le personnage personnage
@@ -34,8 +34,10 @@ class character :
             possible_exits=[]
        #On regarde quelles sont les sorties possibles de la salle ds lequel est le PNJ
             for exit_room in self.current_room.exits.values():
-                if exit_room is not None and exit_room is not "interdit":
+                if exit_room is not None and exit_room != "interdit":
                     possible_exits.append(exit_room)
+            if DEBUG:
+                print(f"DEBUG: {self.name} voit {len(possible_exits)} sorties possibles.")
        #Le pnj peut se deplacer dans les salles de possible_exits 
             if possible_exits:
                 old_room = self.current_room

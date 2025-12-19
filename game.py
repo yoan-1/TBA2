@@ -120,13 +120,11 @@ class Game:
         while not self.finished:
             # Get the command from the player
             self.process_command(input("> "))
-        return None
+        
 
-        #parcourir toutes les salles pour trouver le pnj
-        for room in self.rooms:
-            for character in room.characters.values():
-                if character.current_room == room:
-                    character.move()
+            for room in self.rooms:
+                for pnj in list(room.characters.values()):
+                    pnj.move()
 
     # Process the command entered by the player
     def process_command(self, command_string) -> None:
