@@ -9,6 +9,6 @@ class Item:
         return f"{self.name} : {self.description} ({self.weight} kg)"
 
 if __name__ == "__main__":
-    Item("sword", "une épée au fil tranchant comme un rasoir", 2)
+    sword=Item("sword", "une épée au fil tranchant comme un rasoir", 2)
     print(sword)
 
