@@ -42,6 +42,8 @@ class Game:
         self.commands["drop"] = drop
         history = Command("history", " : afficher les pièces déjà visitées", Actions.history, 0)
         self.commands["history"] = history
+        talk = Command("talk", " <character> : parler à un personnage présent dans la pièce", Actions.talk, 1)
+        self.commands["talk"] = talk
         
         # Setup rooms
 
@@ -85,7 +87,7 @@ class Game:
         Couloir_2.exits={"N" : Salle_3, "O": dehors, "E" : Rue, "S" : Escaliers2}
         Salle_3.exits={"S" : Couloir_2} 
         Cafeteria.exits={"N" : Rue} 
-        Club_musique.exits={"W" : Rue}
+        Club_musique.exits={"N" : Parking}
         Escaliers1.exits={"N" : Couloir_1, "S" : Parking}
         Escaliers2.exits={"N" : Couloir_2, "S" : Parking}  
         Parking.exits={"N" : Escaliers1, "O" : Escaliers2, "S" : Club_musique}

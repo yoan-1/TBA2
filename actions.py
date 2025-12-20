@@ -276,6 +276,27 @@ class Actions:
     def drop(game, list_of_words, number_of_parameters=None):
         return Actions._drop_simple(game, list_of_words)
 
+    def talk(game, list_of_words, number_of_parameters=None):
+        if len(list_of_words) < 2:
+            print("\nOups.. réessaies encore !\n")
+            return False
+
+        character_name = list_of_words[1].lower()
+        player = game.player
+        current_room = player.current_room
+
+        if current_room is None:
+            print("\n Il n'y a personne à qui parler ici.\n")
+            return False
+
+        if not getattr(current_room, 'characters', {}) or character_name not in current_room.characters:
+            print(f"\n Il n'y a pas de personnage nommé '{character_name}' ici.\n")
+            return False
+
+        character = current_room.characters[character_name]
+        message = character.get_msg()
+        print(f"\n{message}\n")
+        return True
 
   
 

@@ -37,7 +37,7 @@ class character :
                 if exit_room is not None and exit_room != "interdit":
                     possible_exits.append(exit_room)
             if DEBUG:
-                print(f"DEBUG: {self.name} voit {len(possible_exits)} sorties possibles.")
+                print(f"DEBUG: {self.name} peut se déplacer à {len(possible_exits)} endroit(s).")
        #Le pnj peut se deplacer dans les salles de possible_exits 
             if possible_exits:
                 old_room = self.current_room
@@ -59,6 +59,14 @@ class character :
                 print(f"DEBUG: {self.name} est resté dans {self.current_room.name}")
             return False
         return False
+    
+    def get_msg(self):
+        if self.msgs:                           #seulement si la liste de messages n'est pas vide
+            return self.msgs.pop(0)
+
+        return f"{self.name} n'a rien à dire."  # C'est le message que le joueur reçoit si le PNJ n'a pas de messages à dire.
+
+        
 
 
 
