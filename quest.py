@@ -272,6 +272,7 @@ class Quest:
             f"Explorer {room_name}",
             f"Aller à {room_name}",
             f"Entrer dans {room_name}"
+            f"Speak to {jean_bomber}"
         ]
 
         for objective in room_objectives:
@@ -285,7 +286,7 @@ class Quest:
         Check if performing an action completes an objective.
         
         Args:
-            action (str): The action performed (e.g., "parler", "prendre", "utiliser").
+            action (str): The action performed (e.g., "speak", "prendre", "utiliser").
             target (str): Optional target of the action.
             player: The player object (optional).
             
@@ -294,9 +295,9 @@ class Quest:
             
         Examples:
         
-        >>> quest = Quest("Talk", "Have a conversation", ["parler avec garde"])
-        >>> quest.check_action_objective("parler", "garde") # doctest: +NORMALIZE_WHITESPACE
-        ✅ Objectif accompli: parler avec garde
+        >>> quest = Quest("Talk", "Have a conversation", ["speak to guard"])
+        >>> quest.check_action_objective("speak", "guard") # doctest: +NORMALIZE_WHITESPACE
+        ✅ Objectif accompli: speak to guard
         <BLANKLINE>
         🏆 Quête terminée: Talk
         <BLANKLINE>
@@ -544,7 +545,7 @@ class QuestManager:
         Examples:
         
         >>> manager = QuestManager()
-        >>> quest = Quest("Actions", "Do actions", ["parler avec roi"])
+        >>> quest = Quest("Actions", "Do actions", ["speak to king"])
         >>> manager.add_quest(quest)
         >>> manager.activate_quest("Actions") # doctest: +NORMALIZE_WHITESPACE
         <BLANKLINE>
@@ -552,8 +553,8 @@ class QuestManager:
         📝 Do actions
         <BLANKLINE>
         True
-        >>> manager.check_action_objectives("parler", "roi") # doctest: +NORMALIZE_WHITESPACE
-        ✅ Objectif accompli: parler avec roi
+        >>> manager.check_action_objectives("speak", "king") # doctest: +NORMALIZE_WHITESPACE
+        ✅ Objectif accompli: speak to king
         <BLANKLINE>
         🏆 Quête terminée: Actions
         <BLANKLINE>

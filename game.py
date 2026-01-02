@@ -37,6 +37,8 @@ class Game:
         self.commands["back"] = back
         look = Command("look"," : regarder autour de soi", Actions.look, 0) 
         self.commands["look"] = look
+        speak = Command("speak", " <nom_pnj> : parler à un PNJ", Actions.speak, 1)
+        self.commands["speak"] = speak
         take = Command("take", " <item> : prendre un item présent dans la pièce", Actions.take, 1)
         self.commands["take"] = take
         drop = Command("drop", " <item> : reposer un item depuis votre inventaire", Actions.drop, 1)
@@ -67,7 +69,7 @@ class Game:
         self.rooms.append(dehors)
         Rue = Room("Rue", "dans la rue de l'ESIEE. Vous voyez une grande allée et pleins d'endroits où aller")
         self.rooms.append(Rue)
-        Cafeteria = Room("Cafétéria", "dans la cafétéria. Il y a plein de tables et de chaises ici ainsi qu'une personne")
+        Cafeteria = Room("Cafétéria", "dans la cafétéria.")
         self.rooms.append(Cafeteria)
         Club_musique = Room("Club musique", "dans le club de musique. Une ambiance étrange survient...") 
         self.rooms.append(Club_musique) 
@@ -103,7 +105,7 @@ class Game:
         
         # NOTE : current_room doit être défini plus tard lors du placement
         demogorgon = character("Démogorgon", "grand, grosse bouche avec plein de dents", None, ["Je serai le président de tous les français"])
-        jean_bomber = character("jean bomber", "une personne classique", None, ["Tu veux aller où?"])
+        jean_bomber = character("jean bomber", "une personne classique", None, ["Salut !"])
 
         # PLACEMENT DES PNJClub_musique
         # Place le Démogorgon dans le Couloir 1
@@ -127,14 +129,10 @@ class Game:
     def _setup_quests(self):
         """Initialize all quests."""
         exploration_quest = Quest(
-            title="Grand Explorateur",
+            title="Trouver jean bomber à la cafétaria",
             description="Explorez tous les lieux de ce monde mystérieux.",
-            objectives=["Visiter Forest"
-                        , "Visiter Tower"
-                        , "Visiter Cave"
-                        , "Visiter Cottage"
-                        , "Visiter Castle"],
-            reward="Titre de Grand Explorateur"
+            objectives=["speak to jean bomber"],
+            reward="Le club musique se trouve au parking en passant par les escaliers"
         )
 
         travel_quest = Quest(
@@ -170,7 +168,8 @@ class Game:
 
             for room in self.rooms:
                 for pnj in list(room.characters.values()):
-                    pnj.move()
+                    if pnj.name.lower() != "jean bomber":
+                        pnj.move()
 
     # Process the command entered by the player
     def process_command(self, command_string) -> None:
