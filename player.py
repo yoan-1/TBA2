@@ -1,4 +1,6 @@
 # Define the Player class.
+from quest import QuestManager
+
 class Player():
 
     # Define the constructor.
@@ -8,6 +10,13 @@ class Player():
         self.history = []
         # Inventory: dictionnaire item_name -> Item instance
         self.inventory = {} if inventory is None else inventory
+        self.quest_manager = QuestManager()
+        self.move_count = 0
+        self.rewards = []
+        # conversation state for commands like 'je m'appelle'
+        self.conversation_with = None
+        self.waiting_for_name = False
+        self.custom_name = None
 
     def get_history(self):       
         # Si l'historique n'a qu'une seule pièce (la pièce actuelle), on ne liste rien.
@@ -32,6 +41,9 @@ class Player():
         for item in self.inventory.values():
             inventory_string += f"    - {item.name} : {item.description} ({item.weight} kg)\n"
         return inventory_string
+
+    def add_reward(self, reward):
+        self.rewards.append(reward)
 
 
 
