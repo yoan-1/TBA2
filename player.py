@@ -13,6 +13,10 @@ class Player():
         self.quest_manager = QuestManager()
         self.move_count = 0
         self.rewards = []
+        # conversation state for commands like 'je m'appelle'
+        self.conversation_with = None
+        self.waiting_for_name = False
+        self.custom_name = None
 
     def get_history(self):       
         # Si l'historique n'a qu'une seule pièce (la pièce actuelle), on ne liste rien.

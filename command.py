@@ -32,11 +32,12 @@ class Command:
     """
 
     # The constructor.
-    def __init__(self, command_word, help_string, action, number_of_parameters):
+    def __init__(self, command_word, help_string, action, number_of_parameters, hidden=False):
         self.command_word = command_word
         self.help_string = help_string
         self.action = action
         self.number_of_parameters = number_of_parameters
+        self.hidden = hidden
 
     # The string representation of the command.
     def __str__(self):

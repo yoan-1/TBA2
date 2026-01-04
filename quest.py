@@ -1,4 +1,5 @@
 """ Define the Quest class"""
+from item import Item
 
 class Quest:
     """
@@ -44,6 +45,12 @@ class Quest:
         self.is_completed = False
         self.is_active = False
         self.reward = reward
+        # id assigned by QuestManager when added
+        self.id = None
+        # rooms that will auto-activate this quest when discovered for first time
+        self.activation_rooms = []
+        # items that will auto-activate this quest when taken
+        self.activation_items = []
 
 
     def activate(self):
@@ -128,9 +135,17 @@ class Quest:
             self.is_completed = True
             print(f"\n🏆 Quête terminée: {self.title}")
             if self.reward:
+                # Afficher la récompense
                 print(f"🎁 Récompense: {self.reward}")
                 if player:
+                    # Enregistrer la récompense (nom ou objet) dans les récompenses du joueur
                     player.add_reward(self.reward)
+                    # Si la récompense est un Item, l'ajouter directement à l'inventaire du joueur
+                    if isinstance(self.reward, Item):
+                        if player.inventory is None:
+                            player.inventory = {}
+                        player.inventory[self.reward.name] = self.reward
+                        print(f"\n{self.reward.name} ajouté à votre inventaire.")
             print()
 
 
@@ -148,7 +163,7 @@ class Quest:
         '❓ Collect (Non activée)'
         >>> quest.activate()
         <BLANKLINE>
-        🗡️  Nouvelle quête activée: Collect
+        🗡️  Nivée: Collect
         📝 Collect items
         <BLANKLINE>
         >>> quest.get_status()
@@ -160,12 +175,15 @@ class Quest:
         '⏳ Collect (1/2 objectifs)'
         """
         if not self.is_active:
-            return f"❓ {self.title} (Non activée)"
+            prefix = f"{self.id}. " if getattr(self, 'id', None) else ''
+            return f"❓ {prefix}{self.title} (Non activée)"
         if self.is_completed:
-            return f"✅ {self.title} (Terminée)"
+            prefix = f"{self.id}. " if getattr(self, 'id', None) else ''
+            return f"✅ {prefix}{self.title} (Terminée)"
         completed_count = len(self.completed_objectives)
         total_count = len(self.objectives)
-        return f"⏳ {self.title} ({completed_count}/{total_count} objectifs)"
+        prefix = f"{self.id}. " if getattr(self, 'id', None) else ''
+        return f"⏳ {prefix}{self.title} ({completed_count}/{total_count} objectifs)"
 
 
     def get_details(self, current_counts=None):
@@ -272,7 +290,6 @@ class Quest:
             f"Explorer {room_name}",
             f"Aller à {room_name}",
             f"Entrer dans {room_name}"
-            f"Speak to {jean_bomber}"
         ]
 
         for objective in room_objectives:
@@ -408,25 +425,39 @@ class QuestManager:
         self.active_quests = []
         self.player = player
 
-
     def add_quest(self, quest):
         """
-        Add a quest to the game.
-        
-        Args:
-            quest (Quest): The quest to add.
-            
-        Examples:
-        
-        >>> manager = QuestManager()
-        >>> quest = Quest("Quest 1", "First quest")
-        >>> manager.add_quest(quest)
-        >>> len(manager.quests)
-        1
-        >>> manager.quests[0].title
-        'Quest 1'
+        Add a quest to the game and assign it a numeric id.
         """
+        # assign sequential id
+        quest.id = len(self.quests) + 1
         self.quests.append(quest)
+
+
+    
+
+    def activate_quest_by_id(self, quest_id):
+        """Activate a quest by its numeric id."""
+        for quest in self.quests:
+            if quest.id == quest_id and not quest.is_active:
+                quest.activate()
+                self.active_quests.append(quest)
+                return True
+        return False
+
+    def activate_quests_for_room(self, room_name):
+        """Activate all quests that should trigger when discovering a room."""
+        for quest in self.quests:
+            if not quest.is_active and room_name in [r for r in quest.activation_rooms]:
+                quest.activate()
+                self.active_quests.append(quest)
+
+    def activate_quests_for_item(self, item_name):
+        """Activate all quests that should trigger when taking an item."""
+        for quest in self.quests:
+            if not quest.is_active and item_name in [i for i in quest.activation_items]:
+                quest.activate()
+                self.active_quests.append(quest)
 
 
     def activate_quest(self, quest_title):

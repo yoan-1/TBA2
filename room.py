@@ -10,13 +10,11 @@ class Room:
         self.inventory = {}
 
     def get_exit(self, direction):
-        if direction in self.exits.keys():
-            return self.exits[direction]
-        else:
-            return None
+        # Direct access to exits mapping is sufficient; this helper was unused.
+        return self.exits.get(direction)
 
     def get_exit_string(self):
-        exit_string = "Vos choix possibles sont : "
+        exit_string = "🧭 : "
         for exit in self.exits.keys():
             if self.exits.get(exit) is not None:
                 exit_string += exit + ", "
@@ -37,7 +35,7 @@ class Room:
         # Utilise l'attribut characters corrigé
         for PNJ in self.characters.values():
             # Utilise __str__ de Character : "- Nom : description"
-            content_lines.append(f"-on voit : {PNJ}")
+            content_lines.append(f"On voit : {PNJ}")
 
         if not content_lines:
             return "Il n'y a rien ni personne ici."

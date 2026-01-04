@@ -55,9 +55,40 @@ class Actions:
 
         # Get the direction from the list of words.
         direction = list_of_words[1]
+        # determine next room to check if it was visited before
+        next_room = None
+        if player.current_room and isinstance(player.current_room.exits, dict):
+            next_room = player.current_room.exits.get(direction)
+
+        was_visited = False
+        if next_room is not None and next_room in player.history:
+            was_visited = True
+
+        # Bloquer la sortie de la Salle_1 si le joueur n'a pas la carte
+        try:
+            current_name = player.current_room.name if player.current_room else None
+            if current_name == 'Salle 1' and next_room is not None:
+                inv = getattr(player, 'inventory', {}) or {}
+                if 'consignes' not in inv:
+                    print("\nPensez à prendre les consignes avant de sortir de cette salle !\n")
+                    return False
+        except Exception:
+            pass
+
         # Move the player in the direction specified by the parameter.
-        player.move(direction)
-        return True
+        moved = player.move(direction)
+        if moved:
+            # Mettre à jour le compteur de déplacements
+            player.move_count += 1
+            # Si c'est la première découverte de la salle, activer les quêtes liées
+            if not was_visited:
+                player.quest_manager.activate_quests_for_room(player.current_room.name)
+
+            # Vérifier les objectifs liés aux pièces visitées (pour les quêtes actives)
+            player.quest_manager.check_room_objectives(player.current_room.name)
+            # Vérifier les objectifs de type compteur (ex: Se déplacer X fois)
+            player.quest_manager.check_counter_objectives("Se déplacer", player.move_count)
+        return moved
 
     def quit(game, list_of_words, number_of_parameters):
         """
@@ -131,9 +162,11 @@ class Actions:
             print(MSG0.format(command_word=command_word))
             return False
         
-        # Print the list of available commands.
+        # Print the list of available commands (skip hidden ones)
         print("\nVoici les commandes disponibles:")
         for command in game.commands.values():
+            if getattr(command, 'hidden', False):
+                continue
             print("\t- " + str(command))
         print()
         return True
@@ -200,6 +233,20 @@ class Actions:
             return False
 
         print(current_room.get_inventory())
+        # Activer les quêtes liées à cette salle (si configuré)
+        try:
+            game.player.quest_manager.activate_quests_for_room(current_room.name)
+        except Exception:
+            pass
+        # Activation spéciale: si on fait `look` dans la Cafétéria, activer la quête
+        # 'Parler à jean bomber' (ne doit pas s'activer simplement en entrant)
+        try:
+            if current_room.name == 'Cafétéria':
+                game.player.quest_manager.activate_quest("Parler à jean bomber")
+        except Exception:
+            pass
+        # Vérifier les objectifs liés à l'action 'look' (ex: "look Cafétéria")
+        player.quest_manager.check_action_objectives("look", current_room.name)
         return True
 
     def speak(game, list_of_words, number_of_parameters):
@@ -207,88 +254,144 @@ class Actions:
         Parler à un PNJ dans la pièce actuelle.
         """
         l = len(list_of_words)
+        # If no parameter provided or incorrect usage, ask to retry
         if l < number_of_parameters + 1:
-            command_word = list_of_words[0]
-            print(MSG1.format(command_word=command_word))
+            print("Réessayes")
             return False
 
         player = game.player
         current_room = player.current_room
         pnj_name = " ".join(list_of_words[1:]).lower()
 
+        # If there's no room or the PNJ is not present or not communicative, ask to retry
         if current_room is None:
-            print("\nIl n'y a personne ici.\n")
+            print("Réessayes")
             return False
 
         if not hasattr(current_room, 'characters') or pnj_name not in current_room.characters:
-            print(f"\nIl n'y a pas de PNJ nommé '{pnj_name}' ici.\n")
+            print("Réessayes")
             return False
 
         pnj = current_room.characters[pnj_name]
+        if not getattr(pnj, 'msgs', None):
+            print("Réessayes")
+            return False
+
         print(f"\nVous parlez à {pnj.name}.")
-        if pnj.msgs:
-            print(f"{pnj.name} dit : {pnj.msgs[0]}")
-        else:
-            print(f"{pnj.name} n'a rien à dire.")
-            # Vérifier les objectifs de quête
-            player.quest_manager.check_action_objectives("speak", pnj_name)
-            return True
+        print(f"{pnj.name} dit : {pnj.msgs[0]}")
 
         # Logique spéciale pour jean_bomber
         if pnj.name.lower() == "jean bomber":
-            conversation_active = True
-            numéro_de_réponse = "Que voulez-vous répondre ? Entrer le numéro correspondant \nou 'au revoir' pour quitter la conversation."
-            
-            message_index = 1  # Prochain message
-            additional_msgs = ["C'est génial, tu es musicien ?",
-                               "Génial ! Le club musique est au parking en passant par les escaliers.", 
-                               "Je vois. Cette année t'auras plein de temps pour apprendre à jouer\nd'un instrument de musique, mais ne néglige pas tes cours !!",
-                               "En voilà quelqu'un bien pressé ! Tu devrais aller au club trico ça va te calmer !!",
-                               "Oui bien sûr ! Le club musique est au parking en passant par les escaliers."]
-            while conversation_active:
-                if message_index == 1:
-                    print(f"\n{numéro_de_réponse}")
-                    print("1. Salut ! Je souhaite aller au club musique")
-                elif message_index == 2:
-                    print(f"Que voulez-vous lui répondre ?")
-                    print("1. Oui")
-                    print("2. Non")
-                    print("3. Peu importe, je souhaite uniquement connaître l'emplacement du club musique")
-                elif message_index == 3:
-                    print(f"Que voulez-vous lui répondre ?")
-                    print("1. Super ! Sais-tu où se trouve le club musique ?")
-                else:
-                    print(f"Que voulez-vous lui répondre ?")
-                    print("1. au revoir")
-                choice = input("> ").strip().lower()
-                if "au revoir" in choice:
-                    print(f"\n{pnj.name} est partit.")
-                    conversation_active = False
-                elif message_index == 1 and ("1" in choice or "club" in choice or "musique" in choice):
-                    print(f"{pnj.name} dit : {additional_msgs[0]}")
-                    message_index += 1
-                elif message_index == 2 and ("1" in choice or "ui" in choice):
-                    print(f"{pnj.name} dit : {additional_msgs[1]}")
-                    message_index += 1
-                    print(f"\nVous avez quitté la conversation avec {pnj.name}.")
-                    conversation_active = False
-                    message_index = 0
-                elif message_index == 2 and ("2" in choice or "on" in choice):
-                    print(f"{pnj.name} dit : {additional_msgs[2]}")
-                    message_index += 1
-                elif message_index == 2 and ("3" in choice or "peu importe" in choice):
-                    print(f"{pnj.name} dit : {additional_msgs[3]}")
-                    print(f"\nVous quittez la conversation avec {pnj.name}.")
-                    conversation_active = False
-                    message_index = 0
-                elif message_index == 3 and ("1" in choice or "uper" in choice):
-                    print(f"{pnj.name} dit : {additional_msgs[4]}")
-                    print(f"\nVous avez quitté la conversation avec {pnj.name}.")
-                    conversation_active = False
-                    message_index = 0
+            # ensure PNJ has talk_count
+            if not hasattr(pnj, 'talk_count'):
+                pnj.talk_count = 0
 
-            else :
-                True
+            pnj.talk_count += 1
+
+            # Premier dialogue (premier contact)
+            if pnj.talk_count == 1:
+             
+                conversation_active = True
+                numero_de_reponse = "Que voulez-vous répondre ? Entrer le numéro correspondant \nou 'au revoir' pour quitter la conversation."
+                
+                message_index = 1  # Prochain message
+                additional_msgs = ["C'est génial, tu es musicien ?",
+                                   "Génial ! Le club musique est au parking en passant par les escaliers.", 
+                                   "Je vois. Cette année t'auras plein de temps pour apprendre à jouer\nd'un instrument de musique, mais ne néglige pas tes cours !!",
+                                   "En voilà quelqu'un bien pressé ! Tu devrais aller au club trico ça va te calmer !!",
+                                   "Oui bien sûr ! Le club musique est au parking en passant par les escaliers."]
+                while conversation_active:
+                    if message_index == 1:
+                        print(f"\n{numero_de_reponse}")
+                        print("1. Salut ! Je souhaite aller au club musique")
+                    elif message_index == 2:
+                        print(f"Que voulez-vous lui répondre ?")
+                        print("1. Oui")
+                        print("2. Non")
+
+                    elif message_index == 3:
+                        print(f"Que voulez-vous lui répondre ?")
+                        print("1. Super ! Sais-tu où se trouve le club musique ?")
+                    else:
+                        print(f"Que voulez-vous lui répondre ?")
+                        print("1. au revoir")
+                    choice = input("> ").strip().lower()
+                    if "au revoir" in choice:
+                        print(f"\n{pnj.name} est partit.")
+                        conversation_active = False
+                    elif message_index == 1 and ("1" in choice or "club" in choice or "musique" in choice):
+                        print(f"{pnj.name} dit : {additional_msgs[0]}")
+                        message_index += 1
+                    elif message_index == 2 and ("1" in choice or "ui" in choice):
+                        print(f"{pnj.name} dit : {additional_msgs[1]}")
+                        message_index += 1
+                        print(f"\nVous avez quitté la conversation avec {pnj.name}.")
+                        conversation_active = False
+                        message_index = 0
+                    elif message_index == 2 and ("2" in choice or "on" in choice):
+                        print(f"{pnj.name} dit : {additional_msgs[2]}")
+                        message_index += 1
+                    elif message_index == 3 and ("1" in choice or "uper" in choice):
+                        print(f"{pnj.name} dit : {additional_msgs[3]}")
+                        print(f"\nVous avez quitté la conversation avec {pnj.name}.")
+                        conversation_active = False
+                        message_index = 0
+
+            else:
+                # deuxième fois que l'on parle à Jean Bomber -> nouvelle logique
+                print("\nJean Bomber dit : Alors tu t'es décidé à aller au club ?")
+                print("1. Oui, merci !")
+                print("2. Je ne trouve toujours pas...")
+                choice = input("> ").strip().lower()
+                if "1" in choice or "oui" in choice:
+                    print("Jean Bomber : Alors bonne chance, à bientôt !")
+                else:
+                    # chemin où Jean propose d'emmener le joueur
+                    print("Jean Bomber : Cherche bien et tu finiras par trouver. Tu t'appelles comment d'ailleurs ?")
+                    print(f"je m'appelle {player.name}")
+                        
+                    print("\nJean Bomber : ça marche ! Moi c'est Jean Bomber ! Laisse moi t'y emmener. Bon, je t'explique. Pour rentrer dans la salle musique, c'est un peu spécial. Il faut que tu fonces dans la forte pour qu'elle s'ouvre correctement.  A toi de jouer !")
+                    # trouver la salle Marcel Dassault
+                    target = None
+                    for r in game.rooms:
+                        if r.name == 'Marcel Dassault':
+                            target = r
+                            break
+                    if target:
+                        player.current_room = target
+                        player.history.append(target)
+                        # déplacer jean bomber dans cette salle si présent ailleurs
+                        for room in game.rooms:
+                            if 'jean bomber' in getattr(room, 'characters', {}):
+                                pnj_obj = room.characters.pop('jean bomber')
+                                target.characters['jean bomber'] = pnj_obj
+                                pnj_obj.current_room = target
+                                break
+                        print("\nVous foncez pour ouvrir la porte comme vous a indiqué jean bomber à qui vous faites confiance... la porte s'ouvre à la volée et vous trébuchez sur un carton rempli de cours de statistiques. Vous vous étendez de tout votre long devant 200 élèves interloqués de votre soudaine apparition...")
+                        print(f"Jean Bomber : C'est ici le club musique {player.name}")
+                        print("La conversation s'achève.")
+                        print("1. S'excuser et écouter le cours")
+                        print("2. Repartir péniblement")
+                        ch = input("> ").strip().lower()
+                        if "1" in ch or "s'excuser" in ch or "ecouter" in ch or "écouter" in ch:
+                            print("Vous vous excusez et décidez d'écouter le cours.")
+                        else:
+                            print("Vous repartez péniblement.")
+                    else:
+                        print("Impossible de trouver la salle 'Marcel Dassault'.")
+                    
+        elif 'au revoir' in low:
+            print(f"\n{pnj.name} est partit.")
+
+        else:
+            print("Réponse non valide. Répondez 'je m'appelle <prénom>' ou 'au revoir'.")
+
+            # activer la quête de récupération de la clé après la conversation
+            if hasattr(pnj, 'talk_count') and pnj.talk_count >= 2:
+                try:
+                    game.player.quest_manager.activate_quest("Récupérer la clé du Club musique")
+                except Exception:
+                    pass
 
         # Vérifier les objectifs de quête
         player.quest_manager.check_action_objectives("speak", pnj_name)
@@ -334,6 +437,13 @@ class Actions:
             player.inventory = {}
         player.inventory[item_name] = item
         print(f"\nVous avez pris l'item '{item_name}'.\n")
+        # Vérifier les objectifs liés aux actions (ex: prendre un item)
+        player.quest_manager.check_action_objectives("take", item_name)
+        # Activer les quêtes qui se déclenchent en prenant cet item
+        try:
+            player.quest_manager.activate_quests_for_item(item_name)
+        except Exception:
+            pass
         return True
     #repose un item
     def _drop_simple(game, list_of_words):
@@ -412,7 +522,6 @@ class Actions:
         # Show all quests
         game.player.quest_manager.show_quests()
         return True
-
     @staticmethod
     def quest(game, list_of_words, number_of_parameters):
         """
@@ -505,11 +614,83 @@ class Actions:
             print(MSG1.format(command_word=command_word))
             return False
 
-        # Get the quest title from the list of words (join all words after command)
-        quest_title = " ".join(list_of_words[1:])
+        # Expect a numeric id for the quest
+        param = list_of_words[1]
+        try:
+            quest_id = int(param)
+        except ValueError:
+            print(f"\nLe paramètre doit être le numéro de la quête (ex: activate 2).\n")
+            return False
 
-        # Activate the quest
-        game.player.quest_manager.activate_quest(quest_title)
+        # Activate the quest by id
+        success = game.player.quest_manager.activate_quest_by_id(quest_id)
+        if not success:
+            print(f"\nQuête avec l'id {quest_id} non trouvée ou déjà activée.\n")
+        return success
+
+    @staticmethod
+    def je(game, list_of_words, number_of_parameters):
+        """Handle 'je m'appelle <prenom>' to set player's name inside a conversation.
+        This command is used when an NPC asked for your name during a conversation.
+        """
+        # minimal validation
+        if len(list_of_words) < 3:
+            print("\nUsage: je m'appelle <prenom>\n")
+            return False
+
+        player = game.player
+        # check pattern: second token may be "m'appelle" or "mappelle"
+        if list_of_words[1].lower() not in ("m'appelle", "mappelle"):
+            print("\nUsage: je m'appelle <prenom>\n")
+            return False
+
+        name = " ".join(list_of_words[2:]).strip()
+        if not name:
+            print("\nIndiquez un prénom après 'je m'appelle'.\n")
+            return False
+
+        player.custom_name = name
+        player.waiting_for_name = False
+        # find the PNJ we're conversing with
+        pnj_name = player.conversation_with
+        player.conversation_with = None
+
+        # respond as Jean Bomber if relevant
+        if pnj_name == 'jean bomber' or pnj_name == 'jean bomber':
+            print(f"\nJean Bomber : ça marche ! Moi c'est Jean Bomber !")
+            print("Jean Bomber : Laisse moi t'y emmener")
+            # find Marcel Dassault room
+            target = None
+            for r in game.rooms:
+                if r.name == 'Marcel Dassault':
+                    target = r
+                    break
+            if target:
+                # move player to Marcel
+                player.current_room = target
+                player.history.append(target)
+                # move jean bomber into that room as well if present somewhere
+                for room in game.rooms:
+                    if 'jean bomber' in getattr(room, 'characters', {}):
+                        pnj = room.characters.pop('jean bomber')
+                        target.characters['jean bomber'] = pnj
+                        pnj.current_room = target
+                        break
+                # narrative
+                print("\nVous foncez pour ouvrir la porte comme vous a indiqué jean bomber à qui vous faites confiance... la porte s'ouvre à la volée et vous trébuchez sur un carton rempli de cours de statistiques. Vous vous étendez de tout votre long devant 200 élèves interloqués de votre soudaine apparition...")
+                print(f"Jean Bomber : C'est ici le club musique {player.custom_name}")
+                print("La conversation s'achève.")
+                # proposer choix
+                print("1. S'excuser et écouter le cours")
+                print("2. Repartir péniblement")
+                ch = input("> ").strip().lower()
+                if "1" in ch or "s'excuser" in ch or "ecouter" in ch or "écouter" in ch:
+                    print("Vous vous excusez et décidez d'écouter le cours.")
+                else:
+                    print("Vous repartez péniblement.")
+            else:
+                print("Impossible de trouver la salle 'Marcel Dassault'.")
+
         return True
 
     @staticmethod

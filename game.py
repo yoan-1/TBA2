@@ -6,7 +6,6 @@ from room import Room
 from player import Player
 from command import Command
 from actions import Actions
-# CORRECTION D'IMPORTATION : La classe se nomme character, pas Character
 from character import character 
 from quest import Quest 
 from item import Item
@@ -39,6 +38,7 @@ class Game:
         self.commands["look"] = look
         speak = Command("speak", " <nom_pnj> : parler à un PNJ", Actions.speak, 1)
         self.commands["speak"] = speak
+        # commande `je m'appelle` retirée — gestion du nom se fait via dialogue interne
         take = Command("take", " <item> : prendre un item présent dans la pièce", Actions.take, 1)
         self.commands["take"] = take
         drop = Command("drop", " <item> : reposer un item depuis votre inventaire", Actions.drop, 1)
@@ -49,7 +49,7 @@ class Game:
         self.commands["quests"] = quests
         quest = Command("quest", " <titre> : afficher les détails d'une quête", Actions.quest, 1)
         self.commands["quest"] = quest
-        activate = Command("activate", " <titre> : activer une quête", Actions.activate, 1)
+        activate = Command("activate", " <num> : activer une quête (utiliser le numéro)", Actions.activate, 1, hidden=False)
         self.commands["activate"] = activate
         rewards = Command("rewards", " : afficher vos récompenses", Actions.rewards, 0)
         self.commands["rewards"] = rewards
@@ -57,7 +57,7 @@ class Game:
         # Setup rooms
 
         
-        Salle_1 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !")
+        Salle_1 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !\n\nProfesseur : Pensez à récupérer les consignes !")
         self.rooms.append(Salle_1)
         Salle_3 = Room("Salle 3", "dans la Salle 3.")
         self.rooms.append(Salle_3)
@@ -65,14 +65,16 @@ class Game:
         self.rooms.append(Couloir_1)
         Couloir_2 = Room("couloir 2", "dans le Couloir 2. Vous voyez des portes tout autour de vous.")
         self.rooms.append(Couloir_2)
-        dehors = Room("dehors", "dehors")
-        self.rooms.append(dehors)
+        jardin = Room("Jardin", "dans le jardin de l'ESIEE.")
+        self.rooms.append(jardin)
         Rue = Room("Rue", "dans la rue de l'ESIEE. Vous voyez une grande allée et pleins d'endroits où aller")
         self.rooms.append(Rue)
         Cafeteria = Room("Cafétéria", "dans la cafétéria.")
         self.rooms.append(Cafeteria)
-        Club_musique = Room("Club musique", "dans le club de musique. Une ambiance étrange survient...") 
-        self.rooms.append(Club_musique) 
+        Club_musique = Room("Club musique", "dans le club de musique. Une ambiance étrange survient...")
+        self.rooms.append(Club_musique)
+        Marcel = Room("Marcel Dassault", "Vous êtes dans la salle Marcel Dassault.")
+        self.rooms.append(Marcel)
         Escaliers1= Room("Escalier 1", "dans l'escalier 1.")
         self.rooms.append(Escaliers1)
         Escaliers2= Room("Escalier 2", "dans l'escalier 2.")
@@ -82,18 +84,20 @@ class Game:
 
         # ############   ITEMS   ############
         # Le poids est à définir
-        # Ajouter un item 'clé' dans la pièce 'dehors'
-        dehors.inventory['key'] = Item('key', 'une clé en fer', 0.1)
+       
+       
+        Club_musique.inventory['clé'] = Item('clé', "une petite clé dorée", 0.1)
         Salle_1.inventory['consignes'] = Item('consignes', "Une feuille avec des consignes pour bien débuter la course d'orientation", 0.2)
+        Salle_1.inventory['consignes'].description = "Une feuille indiquant les pièces à découvrir : Rue, Cafétaria, Club musique"
         Salle_3.inventory['survêt'] = Item('survêt', 'On voit le survêtement rouge de Louis tahhh le tripaloski et les années 80', 0.2)
 
         # Create exits for rooms
 
         Salle_1.exits = { "N" : Couloir_1}
-        Couloir_1.exits = {"O": dehors, "N" : "interdit", "E" : Rue, "S" : Escaliers1}             
-        dehors.exits = {"E" : Couloir_1}
+        Couloir_1.exits = {"O": jardin, "N" : "interdit", "E" : Rue, "S" : Escaliers1}             
+        jardin.exits = {"E" : Couloir_1}
         Rue.exits={"O" : Couloir_1, "E" : Couloir_2, "S" : Cafeteria}
-        Couloir_2.exits={"N" : Salle_3, "O": dehors, "E" : Rue, "S" : Escaliers2}
+        Couloir_2.exits={"N" : Salle_3, "O": jardin, "E" : Rue, "S" : Escaliers2}
         Salle_3.exits={"S" : Couloir_2} 
         Cafeteria.exits={"N" : Rue} 
         Club_musique.exits={"W" : Rue}
@@ -111,15 +115,13 @@ class Game:
         # Place le Démogorgon dans le Couloir 1
         Club_musique.characters[demogorgon.name.lower()] = demogorgon
         demogorgon.current_room = Club_musique
-        
-        # Place Jean Bomber dans la Rue
         Cafeteria.characters[jean_bomber.name.lower()] = jean_bomber
         jean_bomber.current_room = Cafeteria
 
 
         # Setup player and starting roomSFS
 
-        self.player = Player(input("\nEntrez votre nom: "), {})
+        self.player = Player(input("\nEntre ton pseudo: "), {})
         self.player.current_room = Salle_1
         self.player.history.append(self.player.current_room)
         self.player.quest_manager.player = self.player
@@ -128,33 +130,70 @@ class Game:
 
     def _setup_quests(self):
         """Initialize all quests."""
-        exploration_quest = Quest(
-            title="Trouver jean bomber à la cafétaria",
+        jean_bomber_quest = Quest(
+            title="Trouver la cafétaria",
             description="Explorez tous les lieux de ce monde mystérieux.",
-            objectives=["speak to jean bomber"],
-            reward="Le club musique se trouve au parking en passant par les escaliers"
+            objectives=["Aller à Cafétéria"],
+            reward="Go tabasser un sandwich"
         )
 
-        travel_quest = Quest(
-            title="Grand Voyageur",
-            description="Déplacez-vous 10 fois entre les lieux.",
-            objectives=["Se déplacer 10 fois"],
-            reward="Bottes de voyageur"
+        
+        # 1) Quête d'item : récupérer une clé dans le club musique
+        key_quest = Quest(
+            title="Récupérer la clé du Club musique",
+            description="Récupérer la clé située dans le Club musique.",
+            objectives=["take clé"],
+            reward=Item('clé', "Une clé en récompense", 0.1)
         )
 
-        discovery_quest = Quest(
-            title="Découvreur de Secrets",
-            description="Découvrez les trois lieux les plus mystérieux.",
-            objectives=["Visiter Cave"
-                        , "Visiter Tower"
-                        , "Visiter Castle"],
-            reward="Clé dorée"
+        # 2) Quête de déplacement : atteindre le Club musique
+        travel_to_club = Quest(
+            title="Atteindre le Club musique",
+            description="Allez jusqu'au Club musique.",
+            objectives=["Aller à Club musique"],
+            reward=Item('guitare', "Une guitare acoustique", 2.0)
         )
 
-        # Add quests to player's quest manager
-        self.player.quest_manager.add_quest(exploration_quest)
-        self.player.quest_manager.add_quest(travel_quest)
-        self.player.quest_manager.add_quest(discovery_quest)
+        # 3) Quête d'interaction : interagir avec Jean Bomber (PNJ)
+        map_reward = Item('Carte', "Carte indiquant : Le club musique est au parking en passant par les escaliers", 0.05)
+        interact_jean = Quest(
+            title="Parler à jean bomber",
+            description="Parlez à Jean Bomber dans la Cafétéria.",
+            objectives=["speak jean bomber"],
+            reward=map_reward
+        )
+    
+        
+        aller_dehors = Quest(
+            title="Aller dehors",
+            description="Sortez dehors.", 
+            objectives=["Aller à dehors"], 
+            reward="Sortie réussie"
+            )
+        
+        se_rendre_rue = Quest(
+            title="Se rendre dans la Rue", 
+            description="Allez dans la Rue.", 
+            objectives=["Aller à Rue"], 
+            reward="Gros ampoule au pied après avoir traversé la Rue mskn"
+            )
+        
+        self.player.quest_manager.add_quest(se_rendre_rue)
+        self.player.quest_manager.add_quest(jean_bomber_quest)
+        jean_bomber_quest.activation_rooms = ['Cafétéria']
+        self.player.quest_manager.add_quest(travel_to_club)
+        self.player.quest_manager.add_quest(key_quest)
+        self.player.quest_manager.add_quest(interact_jean)
+        self.player.quest_manager.add_quest(aller_dehors)
+        
+
+        # Les quêtes suivantes s'activent en récupérant l'objet 'consignes'
+        for q in self.player.quest_manager.get_all_quests():
+            if q.title in ("Se rendre dans la Rue", "Trouver la cafétaria", "Atteindre le Club musique"):
+                q.activation_items = ['consignes']
+
+        # La activation de la quête 'Parler à jean bomber' se fera explicitement
+        # lors de la commande `look` en Cafétéria (pour éviter activation à l'entrée).
 
     # Play the game
     def play(self):
@@ -196,11 +235,12 @@ class Game:
 
     # Print the welcome message
     def print_welcome(self):
-        print(f"\nBienvenue {self.player.name} dans ce jeu d'aventure !")
-        print("Entrez 'help' si vous avez besoin d'aide.")
+        print(f"\nBienvenue {self.player.name} dans ce jeu pédagogique qui te permettra de découvrir l'ESIEE !\n\nenfin.... on l'espère...\n\n")
+        print("Rentrer 'help' te permettra d'afficher la liste des commandes nécessaires pour évoluer dans le jeu.")
+        
         #
         print(self.player.current_room.get_long_description())
-    
+       
 
 def main():
     # Create a game object and play the game
