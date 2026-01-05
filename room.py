@@ -4,10 +4,11 @@ class Room:
     def __init__(self, name, description):
         self.name = name
         self.description = description
-        self.exits = {}
-        self.characters = {}
-        # Inventory: dictionnaire item_name -> Item instance
-        self.inventory = {}
+            self.exits = {}
+            # Items present in the room (name -> Item)
+            self.inventory = {}
+            # Characters (PNJ) present in the room (lower-name -> Character)
+            self.characters = {}
 
     def get_exit(self, direction):
         # Direct access to exits mapping is sufficient; this helper was unused.
@@ -25,19 +26,22 @@ class Room:
         return f"\nVous êtes {self.description}\n\n{self.get_exit_string()}\n"
 
     def get_inventory(self):
-        content_lines = []
-    # 1. Lister les ITEMS
+        """Return a formatted string showing items and characters present."""
+        lines = []
+        # Items
         for item in self.inventory.values():
-            # Utilise __str__ de Item : "- nom : description (poids kg)"
-            content_lines.append(f"- {item}") 
+            try:
+                lines.append(f"- {item.name} : {item.description} ({getattr(item, 'weight', '?')} kg)")
+            except Exception:
+                lines.append(f"- {str(item)}")
 
-        # 2. Lister les PERSONNAGES
-        # Utilise l'attribut characters corrigé
-        for PNJ in self.characters.values():
-            # Utilise __str__ de Character : "- Nom : description"
-            content_lines.append(f"On voit : {PNJ}")
+        # Characters
+        for pnj in self.characters.values():
+            try:
+                lines.append(f"On voit : {pnj}")
+            except Exception:
+                lines.append(f"On voit : {str(pnj)}")
 
-        if not content_lines:
-            return "Il n'y a rien ni personne ici."
-            
-        return "\n".join(content_lines)
+        if not lines:
+            return "\nIl n'y a rien ni personne ici.\n"
+        return "\n" + "\n".join(lines) + "\n"
