@@ -81,6 +81,8 @@ class Game:
         self.rooms.append(Escaliers2)
         Parking= Room("Parking", "sur le parking. Vous voyez des voitures garées un peu partout.")
         self.rooms.append(Parking) 
+        # Le sac contenant le monster_trunk (accessible si on a déjà visité le Club musique)
+        Parking.inventory['sac'] = Item('sac', "un sac à dos usé qui semble contenir quelque chose", 1.0)
 
         # ############   ITEMS   ############
         # Le poids est à définir
@@ -207,8 +209,11 @@ class Game:
 
             for room in self.rooms:
                 for pnj in list(room.characters.values()):
-                    if pnj.name.lower() != "jean bomber":
-                        pnj.move()
+                            if pnj.name.lower() != "jean bomber":
+                                try:
+                                    pnj.move(self)
+                                except TypeError:
+                                    pnj.move()
 
     # Process the command entered by the player
     def process_command(self, command_string) -> None:

@@ -16,6 +16,8 @@ MSG0 = "\nLa commande '{command_word}' ne prend pas de paramètre.\n"
 # The MSG1 variable is used when the command takes 1 parameter.
 MSG1 = "\nLa commande '{command_word}' prend 1 seul paramètre.\n"
 
+from item import Item
+
 class Actions:
 
     def go(game, list_of_words, number_of_parameters):
@@ -431,12 +433,36 @@ class Actions:
             print(f"\nIl n'y a pas d'item nommé '{item_name}' ici.\n")
             return False
 
+        # Special logic: 'sac' contains 'monster_trunk' but can only be taken
+        # if the player has previously visited the 'Club musique'.
+        if item_name == 'sac':
+            visited_club = False
+            for r in getattr(player, 'history', []) or []:
+                try:
+                    if getattr(r, 'name', '').lower() == 'club musique':
+                        visited_club = True
+                        break
+                except Exception:
+                    continue
+            if not visited_club:
+                print("\nVous ne pouvez pas prendre ce sac pour l'instant.\n")
+                return False
+
         # Déplacer l'item de la pièce vers l'inventaire du joueur
         item = current_room.inventory.pop(item_name)
         if player.inventory is None:
             player.inventory = {}
         player.inventory[item_name] = item
         print(f"\nVous avez pris l'item '{item_name}'.\n")
+        # If we just took the sac, reveal the monster_trunk inside it
+        if item_name == 'sac':
+            try:
+                if 'monster_trunk' not in player.inventory:
+                    mt = Item('monster_trunk', "un objet étrange en cuir qui semble permettre de localiser un monstre", 2.0)
+                    player.inventory['monster_trunk'] = mt
+                    print("En fouillant le sac vous trouvez un objet appelé 'monster_trunk'.\n")
+            except Exception:
+                pass
         # Vérifier les objectifs liés aux actions (ex: prendre un item)
         player.quest_manager.check_action_objectives("take", item_name)
         # Activer les quêtes qui se déclenchent en prenant cet item
