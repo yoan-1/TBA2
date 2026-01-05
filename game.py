@@ -106,6 +106,7 @@ class Game:
         Escaliers1.exits={"N" : Couloir_1, "S" : Parking}
         Escaliers2.exits={"N" : Couloir_2, "S" : Parking}  
         Parking.exits={"N" : Escaliers1, "O" : Escaliers2, "S" : Club_musique}
+        Marcel.exits={"N": Rue, "S": Rue}
 
         # ############ SETUP DES PNJ/MONSTRES ############
         
