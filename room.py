@@ -4,11 +4,11 @@ class Room:
     def __init__(self, name, description):
         self.name = name
         self.description = description
-            self.exits = {}
-            # Items present in the room (name -> Item)
-            self.inventory = {}
-            # Characters (PNJ) present in the room (lower-name -> Character)
-            self.characters = {}
+        self.exits = {}
+        # Items present in the room (name -> Item)
+        self.inventory = {}
+        # Characters (PNJ) present in the room (lower-name -> Character)
+        self.characters = {}
 
     def get_exit(self, direction):
         # Direct access to exits mapping is sufficient; this helper was unused.
