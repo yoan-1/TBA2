@@ -298,7 +298,6 @@ class Actions:
                 additional_msgs = ["C'est génial, tu es musicien ?",
                                    "Génial ! Le club musique est au parking en passant par les escaliers.", 
                                    "Je vois. Cette année t'auras plein de temps pour apprendre à jouer\nd'un instrument de musique, mais ne néglige pas tes cours !!",
-                                   "En voilà quelqu'un bien pressé ! Tu devrais aller au club trico ça va te calmer !!",
                                    "Oui bien sûr ! Le club musique est au parking en passant par les escaliers."]
                 while conversation_active:
                     if message_index == 1:
@@ -392,7 +391,7 @@ class Actions:
                     game.player.quest_manager.activate_quest("Récupérer la clé du Club musique")
                 except Exception:
                     pass
-
+                
         # Vérifier les objectifs de quête
         player.quest_manager.check_action_objectives("speak", pnj_name)
 
@@ -577,6 +576,7 @@ class Actions:
         game.player.quest_manager.show_quest_details(quest_title, current_counts)
         return True
 
+  
     @staticmethod
     def activate(game, list_of_words, number_of_parameters):
         """
@@ -735,7 +735,6 @@ class Actions:
         return True
 
 
-  
 
 
 
