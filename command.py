@@ -8,7 +8,6 @@ class Command:
     Attributes:
         command_word (str): The command word.
         help_string (str): The help string.
-    
         action (function): The action to execute when the command is called.
         number_of_parameters (int): The number of parameters expected by the command.
 
@@ -32,12 +31,12 @@ class Command:
     """
 
     # The constructor.
-    def __init__(self, command_word, help_string, action, number_of_parameters, hidden=False):
+    def __init__(self, command_word, help_string, action, number_of_parameters):
         self.command_word = command_word
         self.help_string = help_string
         self.action = action
         self.number_of_parameters = number_of_parameters
-        self.hidden = hidden
+
 
     # The string representation of the command.
     def __str__(self):
