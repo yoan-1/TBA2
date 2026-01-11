@@ -53,6 +53,8 @@ class Game:
         self.commands["activate"] = activate
         rewards = Command("rewards", " : afficher vos récompenses", Actions.rewards, 0)
         self.commands["rewards"] = rewards
+        stay = Command("stay", " : rester sur place (fait avancer le monde)", Actions.stay, 0)
+        self.commands["stay"] = stay
         
         # Setup rooms
 
@@ -63,6 +65,11 @@ class Game:
         self.rooms.append(Salle_3)
         Couloir_1 = Room("Couloir 1", "dans le Couloir 1. Vous voyez des portes tout autour de vous.")
         self.rooms.append(Couloir_1)
+        # Salle 2 existe mais est initialement verrouillée
+        Salle_2 = Room("Salle 2", "dans la Salle 2. La porte est verrouillée.")
+        Salle_2.locked = True
+        self.rooms.append(Salle_2)
+
         Couloir_2 = Room("couloir 2", "dans le Couloir 2. Vous voyez des portes tout autour de vous.")
         self.rooms.append(Couloir_2)
         jardin = Room("Jardin", "dans le jardin de l'ESIEE.")
@@ -81,8 +88,12 @@ class Game:
         self.rooms.append(Escaliers2)
         Parking= Room("Parking", "sur le parking. Vous voyez des voitures garées un peu partout.")
         self.rooms.append(Parking) 
+        # Le joueur a pu laisser quelque chose sur le parking (bouclier)
+        Parking.inventory['bouclier'] = Item('bouclier', "un bouclier robuste que vous aviez laissé sur le parking", 4.0)
+        Parking_2= Room("Parking 2", "sur le parking. Vous voyez des voitures garées un peu partout.")
+        self.rooms.append(Parking_2)
         # Le sac contenant le monster_trunk (accessible si on a déjà visité le Club musique)
-        Parking.inventory['sac'] = Item('sac', "un sac à dos usé qui semble contenir quelque chose", 1.0)
+        Parking_2.inventory['sac'] = Item('sac', "un sac à dos usé qui semble contenir quelque chose", 1.0)
 
         # ############   ITEMS   ############
         # Le poids est à définir
@@ -92,20 +103,30 @@ class Game:
         Salle_1.inventory['consignes'] = Item('consignes', "Une feuille avec des consignes pour bien débuter la course d'orientation", 0.2)
         Salle_1.inventory['consignes'].description = "Une feuille indiquant les pièces à découvrir : Rue, Cafétaria, Club musique"
         Salle_3.inventory['survêt'] = Item('survêt', 'On voit le survêtement rouge de Louis tahhh le tripaloski et les années 80', 0.2)
+        # Dans la Salle 2 se trouve une carte brillante montrant une croix indiquant
+        # un emplacement dans le Jardin (la croix marque l'endroit où se trouve l'épée).
+        Salle_2.inventory['carte'] = Item('carte', "une carte brillante avec une croix marquant un emplacement dans le Jardin", 0.1)
+        # Placer l'épée dans le jardin à l'emplacement indiqué par la croix
+        jardin.inventory['épée'] = Item('épée', "une épée brillante plantée dans le sol, à l'endroit marqué d'une croix sur une carte", 3.0)
 
         # Create exits for rooms
 
         Salle_1.exits = { "N" : Couloir_1}
-        Couloir_1.exits = {"O": jardin, "N" : "interdit", "E" : Rue, "S" : Escaliers1}             
+        # La sortie nord du Couloir 1 mène à Salle 2, mais Salle 2 est verrouillée au départ
+        Couloir_1.exits = {"O": jardin, "N" : Salle_2, "E" : Rue, "S" : Escaliers1}             
         jardin.exits = {"E" : Couloir_1}
         Rue.exits={"O" : Couloir_1, "E" : Couloir_2, "S" : Cafeteria}
         Couloir_2.exits={"N" : Salle_3, "O": jardin, "E" : Rue, "S" : Escaliers2}
+        # Connecter Salle 2 au Couloir 1
+        Salle_2.exits = {"S": Couloir_1}
         Salle_3.exits={"S" : Couloir_2} 
         Cafeteria.exits={"N" : Rue} 
-        Club_musique.exits={"W" : Rue}
+        Club_musique.exits={"N" : Parking_2}
         Escaliers1.exits={"N" : Couloir_1, "S" : Parking}
         Escaliers2.exits={"N" : Couloir_2, "S" : Parking}  
         Parking.exits={"N" : Escaliers1, "O" : Escaliers2, "S" : Club_musique}
+        Parking_2.exits={"N" : Escaliers1, "O" : Escaliers2}
+        Marcel.exits={"N": Rue, "S": Rue}
 
         # ############ SETUP DES PNJ/MONSTRES ############
         
@@ -204,16 +225,22 @@ class Game:
         # Loop until the game is finished
         while not self.finished:
             # Get the command from the player
+            # reset per-turn PNJ moved flag
+            self._pnjs_moved = False
             self.process_command(input("> "))
-        
 
-            for room in self.rooms:
-                for pnj in list(room.characters.values()):
-                            if pnj.name.lower() != "jean bomber":
-                                try:
-                                    pnj.move(self)
-                                except TypeError:
-                                    pnj.move()
+            # Move PNJ only if they haven't been moved already by a command (eg. `stay`)
+            if not getattr(self, '_pnjs_moved', False):
+                for room in self.rooms:
+                    for pnj in list(room.characters.values()):
+                        if pnj.name.lower() != "jean bomber":
+                            try:
+                                pnj.move(self)
+                            except TypeError:
+                                pnj.move()
+            else:
+                # clear flag for next turn
+                self._pnjs_moved = False
 
     # Process the command entered by the player
     def process_command(self, command_string) -> None:
@@ -226,6 +253,14 @@ class Game:
              return None
              
         command_word = list_of_words[0].lower()
+
+        # If the player is dead, only allow quitting
+        try:
+            if getattr(self.player, 'dead', False) and command_word != 'quit':
+                print("\nVous êtes mort, vous ne pouvez plus faire que 'quit' pour quitter le jeu.\n")
+                return None
+        except Exception:
+            pass
 
         # If the command is not recognized, print an error message
         if command_word not in self.commands.keys():

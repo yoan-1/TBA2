@@ -9,6 +9,8 @@ class Room:
         self.inventory = {}
         # Characters (PNJ) present in the room (lower-name -> Character)
         self.characters = {}
+        # Indique si la porte d'entrée vers cette salle est verrouillée
+        self.locked = False
 
     def get_exit(self, direction):
         # Direct access to exits mapping is sufficient; this helper was unused.

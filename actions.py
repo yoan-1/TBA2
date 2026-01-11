@@ -17,6 +17,7 @@ MSG0 = "\nLa commande '{command_word}' ne prend pas de paramètre.\n"
 MSG1 = "\nLa commande '{command_word}' prend 1 seul paramètre.\n"
 
 from item import Item
+import unicodedata
 
 class Actions:
 
@@ -90,7 +91,157 @@ class Actions:
             player.quest_manager.check_room_objectives(player.current_room.name)
             # Vérifier les objectifs de type compteur (ex: Se déplacer X fois)
             player.quest_manager.check_counter_objectives("Se déplacer", player.move_count)
+            # Si le joueur possède un 'monster_trunk', afficher la position actuelle du monstre
+            try:
+                inv = getattr(player, 'inventory', {}) or {}
+                if 'monster_trunk' in inv:
+                    dem_pos = None
+                    for r in getattr(game, 'rooms', []) or []:
+                        for cname in getattr(r, 'characters', {}).keys():
+                            try:
+                                norm = ''.join(c for c in unicodedata.normalize('NFD', cname).lower() if unicodedata.category(c) != 'Mn')
+                            except Exception:
+                                norm = cname.lower()
+                            if 'demogorgon' in norm:
+                                dem_pos = r.name
+                                break
+                        if dem_pos:
+                            break
+                    if dem_pos:
+                        print(f"\n[monster_trunk] Le monstre est actuellement à : {dem_pos}")
+            except Exception:
+                pass
+            # Si le monstre est dans la même pièce, proposer une confrontation
+            try:
+                chars = getattr(player.current_room, 'characters', {}) or {}
+                if any('demogorgon' in (''.join(c for c in unicodedata.normalize('NFD', n).lower() if unicodedata.category(c) != 'Mn')) for n in chars.keys()):
+                    choice = input("\nVoulez-vous engager le combat ?\n1-oui\n2-non\n> ").strip().lower()
+                    # si le joueur refuse -> il est terrassé et ne peut plus jouer (sauf quit)
+                    if '2' in choice or 'non' in choice:
+                        print("\nVous avez hésité et le monstre vous a terrassé. Vous êtes mort.")
+                        try:
+                            player.dead = True
+                        except Exception:
+                            pass
+                        return moved
+                    # si le joueur accepte
+                    if '1' in choice or 'oui' in choice:
+                        inv = getattr(player, 'inventory', {}) or {}
+                        # victoire si le joueur a le bouclier
+                        if 'bouclier' in inv:
+                            try:
+                                key = next(n for n in chars.keys() if 'demogorgon' in (''.join(c for c in unicodedata.normalize('NFD', n).lower() if unicodedata.category(c) != 'Mn')))
+                                del player.current_room.characters[key]
+                            except Exception:
+                                pass
+                            try:
+                                player.add_reward("Tuer le Démogorgon")
+                            except Exception:
+                                pass
+                            print("\nLe bouclier amortit les coups et vous parvenez à porter l'estoc final.\n"
+                                  "Une lumière éblouissante envahit la pièce...")
+                            print("\nQuand vous rouvrez les yeux, vous êtes étendu au sol au même endroit.\n"
+                                  "Autour de vous, des gens s'agitent comme si tout cela n'avait été qu'un rêve.\n"
+                                  "Était-ce un songe ? Vous vous relevez, encore étourdi.")
+                            return moved
+                        else:
+                            print("\nVous vous jetez sur le monstre, mais il est bien trop fort.\n"
+                                  "Vous vous en sortez de justesse, épuisé. Vous vous rappelez alors avoir laissé quelque chose sur le Parking qui pourrait vous aider (un bouclier).\n"
+                                  "Revenez au Parking pour récupérer ce bouclier avant de l'affronter à nouveau.")
+                        # ne pas supprimer le monstre, permettre de partir
+            except Exception:
+                pass
         return moved
+
+    def stay(game, list_of_words, number_of_parameters):
+        """
+        Stay in the current room for one turn while NPCs (including monsters) move.
+        This lets the world advance without the player changing room.
+        """
+        l = len(list_of_words)
+        if l != number_of_parameters + 1:
+            command_word = list_of_words[0]
+            print(MSG0.format(command_word=command_word))
+            return False
+
+        # Move PNJ/monsters now (simulate a turn passing)
+        try:
+            for room in getattr(game, 'rooms', []) or []:
+                for pnj in list(getattr(room, 'characters', {}).values()):
+                    if pnj.name.lower() != "jean bomber":
+                        try:
+                            pnj.move(game)
+                        except TypeError:
+                            pnj.move()
+        except Exception:
+            pass
+
+        # Mark that PNJs have already moved this turn so Game.play doesn't move them again
+        try:
+            game._pnjs_moved = True
+        except Exception:
+            pass
+
+        player = game.player
+        # If the player has a monster_trunk, reveal the monster position after movement
+        try:
+            inv = getattr(player, 'inventory', {}) or {}
+            if 'monster_trunk' in inv:
+                dem_pos = None
+                for r in getattr(game, 'rooms', []) or []:
+                    for cname in getattr(r, 'characters', {}).keys():
+                        try:
+                            norm = ''.join(c for c in __import__('unicodedata').normalize('NFD', cname).lower() if __import__('unicodedata').category(c) != 'Mn')
+                        except Exception:
+                            norm = cname.lower()
+                        if 'demogorgon' in norm:
+                            dem_pos = r.name
+                            break
+                    if dem_pos:
+                        break
+                if dem_pos:
+                    print(f"\n[monster_trunk] Le monstre est actuellement à : {dem_pos}")
+        except Exception:
+            pass
+
+        # If the monster is now in the same room, offer confrontation
+        try:
+            chars = getattr(player.current_room, 'characters', {}) or {}
+            if any('demogorgon' in (''.join(c for c in __import__('unicodedata').normalize('NFD', n).lower() if __import__('unicodedata').category(c) != 'Mn')) for n in chars.keys()):
+                choice = input("\nVoulez-vous engager le combat ?\n1-oui\n2-non\n> ").strip().lower()
+                if '2' in choice or 'non' in choice:
+                    print("\nVous avez hésité et le monstre vous a terrassé. Vous êtes mort.")
+                    try:
+                        player.dead = True
+                    except Exception:
+                        pass
+                    return True
+                if '1' in choice or 'oui' in choice:
+                    inv = getattr(player, 'inventory', {}) or {}
+                    if 'bouclier' in inv:
+                        try:
+                            key = next(n for n in chars.keys() if 'demogorgon' in (''.join(c for c in __import__('unicodedata').normalize('NFD', n).lower() if __import__('unicodedata').category(c) != 'Mn')))
+                            del player.current_room.characters[key]
+                        except Exception:
+                            pass
+                        try:
+                            player.add_reward("Tuer le Démogorgon")
+                        except Exception:
+                            pass
+                        print("\nLe bouclier amortit les coups et vous parvenez à porter l'estoc final.\n"
+                              "Une lumière éblouissante envahit la pièce...")
+                        print("\nQuand vous rouvrez les yeux, vous êtes étendu au sol au même endroit.\n"
+                              "Autour de vous, des gens s'agitent comme si tout cela n'avait été qu'un rêve.\n"
+                              "Était-ce un songe ? Vous vous relevez, encore étourdi.")
+                        return True
+                    else:
+                        print("\nVous vous jetez sur le monstre, mais il est bien trop fort.\n"
+                              "Vous vous en sortez de justesse, épuisé. Vous vous rappelez alors avoir laissé quelque chose sur le Parking qui pourrait vous aider (un bouclier).\n"
+                              "Revenez au Parking pour récupérer ce bouclier avant de l'affronter à nouveau.")
+        except Exception:
+            pass
+
+        return True
 
     def quit(game, list_of_words, number_of_parameters):
         """
@@ -449,6 +600,38 @@ class Actions:
                 return False
 
         # Déplacer l'item de la pièce vers l'inventaire du joueur
+        # Si l'inventaire est plein, demander de déposer un item pour faire de la place
+        try:
+            max_slots = getattr(player, 'max_inventory_slots', None)
+        except Exception:
+            max_slots = None
+        if max_slots is not None and len(player.inventory) >= max_slots:
+            # cas spécial: si l'item à prendre est le bouclier, forcer dépôt d'un item
+            if item_name == 'bouclier':
+                print("\nVotre inventaire est plein. Choisissez un item à déposer pour récupérer le bouclier :")
+                items = list(player.inventory.keys())
+                for i, n in enumerate(items, start=1):
+                    print(f"{i}. {n}")
+                choice = input("> ").strip()
+                try:
+                    idx = int(choice) - 1
+                    if idx < 0 or idx >= len(items):
+                        print("\nChoix invalide. Annulation de la prise du bouclier.")
+                        return False
+                    # déposer l'item choisi dans la pièce
+                    to_drop = items[idx]
+                    dropped_item = player.inventory.pop(to_drop)
+                    if getattr(current_room, 'inventory', None) is None:
+                        current_room.inventory = {}
+                    current_room.inventory[to_drop] = dropped_item
+                    print(f"\nVous avez déposé '{to_drop}' pour faire de la place.")
+                except ValueError:
+                    print("\nChoix invalide. Annulation de la prise du bouclier.")
+                    return False
+            else:
+                print("\nVotre inventaire est plein. Vous ne pouvez pas prendre cet item.")
+                return False
+
         item = current_room.inventory.pop(item_name)
         if player.inventory is None:
             player.inventory = {}
@@ -461,6 +644,20 @@ class Actions:
                     mt = Item('monster_trunk', "un objet étrange en cuir qui semble permettre de localiser un monstre", 2.0)
                     player.inventory['monster_trunk'] = mt
                     print("En fouillant le sac vous trouvez un objet appelé 'monster_trunk'.\n")
+                    # Message indiquant l'objectif principal et le fonctionnement du monster_trunk
+                    try:
+                        print("\nOBJECTIF: Tuer le monstre qui rôde.\n"
+                              "Votre 'monster_trunk' vous permettra de localiser le monstre en temps réel.")
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+        # Message narratif spécial si le joueur prend l'épée
+        if item_name == 'épée':
+            try:
+                print("\nUn frisson parcourt votre échine. L'épée vibre dans vos mains et\n"
+                      "vous réalisez que vous n'êtes plus tout à fait dans la même dimension.\n"
+                      "Quelque chose rôde peut-être... Préparez-vous à l'affronter.")
             except Exception:
                 pass
         # Vérifier les objectifs liés aux actions (ex: prendre un item)
@@ -758,6 +955,16 @@ class Actions:
 
         # Show rewards
         game.player.quest_manager.show_rewards()
+        # If player has killed the Demogorgon, show the accomplishment and end the game
+        try:
+            rewards = getattr(game.player, 'rewards', []) or []
+            if "Tuer le Démogorgon" in rewards:
+                print("\nAccomplissement : Vous avez tué le Démogorgon.\n"
+                      "Vous vous demandez si tout cela n'était qu'un rêve...\n"
+                      "Le jeu se termine ici.")
+                game.finished = True
+        except Exception:
+            pass
         return True
 
 

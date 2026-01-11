@@ -17,6 +17,10 @@ class Player():
         self.conversation_with = None
         self.waiting_for_name = False
         self.custom_name = None
+        # capacité maximale d'objets dans l'inventaire
+        self.max_inventory_slots = 3
+        # état du joueur (mort/vivant)
+        self.dead = False
 
     def get_history(self):       
         # Si l'historique n'a qu'une seule pièce (la pièce actuelle), on ne liste rien.
@@ -56,10 +60,33 @@ class Player():
         if next_room is None:
             print("\nImpossible d'aller dans cette direction !\n")
             return False    
-        
-        if next_room == "interdit":
-            print("\nCette porte est fermée à clé.\n")
-            return False
+        # Si la salle ciblée est une instance de Room et verrouillée
+        try:
+            locked = getattr(next_room, 'locked', False)
+        except Exception:
+            locked = False
+
+        if locked:
+            # Si le joueur possède une clé, proposer d'utiliser
+            if 'clé' in (self.inventory or {}):
+                choice = input("\nVous êtes face à une porte verrouillée. Voulez-vous utiliser la clé ?\n1-oui\n2-non\n> ").strip().lower()
+                if "1" in choice or "oui" in choice:
+                    try:
+                        next_room.locked = False
+                    except Exception:
+                        pass
+                    # Entrer dans la salle maintenant déverrouillée
+                    self.current_room = next_room
+                    self.history.append(self.current_room)
+                    print(self.current_room.get_long_description())
+                    return True
+                else:
+                    print("\nVous restez dans le couloir.\n")
+                    print(self.current_room.get_long_description())
+                    return False
+            else:
+                print("\nCette porte est fermée à clé.\n")
+                return False
         
         # Set the current room to the next room.
         self.current_room = next_room
