@@ -18,20 +18,13 @@ class character :
         self.health = 100 
 
     def __str__(self):
-        """
-        Redéfinit la représentation textuelle pour retourner "Nom : description" 
-        comme demandé dans l'exercice.
-        """
         return f"{self.name} : {self.description}"
 
     def get_description_char(self):
-        """
-        Retourne une description du personnage pour un affichage dans le jeu.
-        """
         return f"\nVous êtes en face de {self.description}.\n"
     
     def move(self, game=None):
-        # Determine whether to show debug for this character (Demogorgon only after player has 'monster_trunk')
+        # Déterminer s’il faut afficher le débogage pour ce personnage (Demogorgon uniquement après que le joueur a 'monster_trunk')
         try:
             norm_name = ''.join(c for c in unicodedata.normalize('NFD', self.name).lower() if unicodedata.category(c) != 'Mn')
         except Exception:
