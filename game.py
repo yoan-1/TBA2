@@ -1,6 +1,6 @@
-# Description: Game class
+# Description: classe game
 
-# Import modules
+# Importation des  modules
 
 from room import Room
 from player import Player
@@ -22,7 +22,7 @@ class Game:
     # Setup the game
     def setup(self):
 
-        # Setup commands
+        # Setup commandes
 
         help = Command("help", " : afficher cette aide", Actions.help, 0)
         self.commands["help"] = help
@@ -109,7 +109,7 @@ class Game:
         # Placer l'épée dans le jardin à l'emplacement indiqué par la croix
         jardin.inventory['épée'] = Item('épée', "une épée brillante plantée dans le sol, à l'endroit marqué d'une croix sur une carte", 3.0)
 
-        # Create exits for rooms
+        # Créer des sorties pour les rooms
 
         Salle_1.exits = { "N" : Couloir_1}
         # La sortie nord du Couloir 1 mène à Salle 2, mais Salle 2 est verrouillée au départ
@@ -142,7 +142,7 @@ class Game:
         jean_bomber.current_room = Cafeteria
 
 
-        # Setup player and starting roomSFS
+        # Configurer le lecteur et démarrer la salle de départ
 
         self.player = Player(input("\nEntre ton pseudo: "), {})
         self.player.current_room = Salle_1
@@ -152,7 +152,6 @@ class Game:
         self._setup_quests()
 
     def _setup_quests(self):
-        """Initialize all quests."""
         jean_bomber_quest = Quest(
             title="Trouver la cafétaria",
             description="Explorez tous les lieux de ce monde mystérieux.",
@@ -222,14 +221,14 @@ class Game:
     def play(self):
         self.setup()
         self.print_welcome()
-        # Loop until the game is finished
+        # Boucle jusqu’à ce que le jeu soit terminé
         while not self.finished:
-            # Get the command from the player
-            # reset per-turn PNJ moved flag
+            # Obtenir la commande du joueur
+            # réinitialiser le drapeau déplacé par tour PNJ
             self._pnjs_moved = False
             self.process_command(input("> "))
 
-            # Move PNJ only if they haven't been moved already by a command (eg. `stay`)
+            # Déplacer PNJ seulement s’ils n’ont pas déjà été déplacés par une commande (par exemple, rester)
             if not getattr(self, '_pnjs_moved', False):
                 for room in self.rooms:
                     for pnj in list(room.characters.values()):
@@ -239,13 +238,13 @@ class Game:
                             except TypeError:
                                 pnj.move()
             else:
-                # clear flag for next turn
+                # drapeau clair pour le prochain tour
                 self._pnjs_moved = False
 
-    # Process the command entered by the player
+    # Traiter la commande saisie par le joueur
     def process_command(self, command_string) -> None:
 
-        # Split the command string into a list of words
+        # Diviser la chaîne de commande en une liste de mots
         list_of_words = command_string.split(" ")
 
         # Assurer que command_word n'est pas vide
@@ -254,7 +253,7 @@ class Game:
              
         command_word = list_of_words[0].lower()
 
-        # If the player is dead, only allow quitting
+        # Si le joueur est mort, autorisez uniquement la fermeture
         try:
             if getattr(self.player, 'dead', False) and command_word != 'quit':
                 print("\nVous êtes mort, vous ne pouvez plus faire que 'quit' pour quitter le jeu.\n")
@@ -262,18 +261,18 @@ class Game:
         except Exception:
             pass
 
-        # If the command is not recognized, print an error message
+        # Si la commande n’est pas reconnue, afficher un message d’erreur
         if command_word not in self.commands.keys():
             # Ajout du message d'erreur
             print(f"\nCommande '{command_word}' non reconnue. Entrez 'help' pour voir la liste des commandes disponibles.\n")
             return None
             
-        # If the command is recognized, execute it
+        # Si la commande est reconnue, exécutez-la
         else:
             command = self.commands[command_word]
             command.action(self, list_of_words, command.number_of_parameters)
 
-    # Print the welcome message
+    # Imprimer le message de bienvenue
     def print_welcome(self):
         print(f"\nBienvenue {self.player.name} dans ce jeu pédagogique qui te permettra de découvrir l'ESIEE !\n\nenfin.... on l'espère...\n\n")
         print("Rentrer 'help' te permettra d'afficher la liste des commandes nécessaires pour évoluer dans le jeu.")
@@ -283,7 +282,7 @@ class Game:
        
 
 def main():
-    # Create a game object and play the game
+    # Créer un objet de jeu et jouer le jeu
     Game().play()
     
 

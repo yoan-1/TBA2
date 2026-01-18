@@ -43,7 +43,7 @@ class character :
             possible_exits=[]
             #On regarde quelles sont les sorties possibles de la salle ds lequel est le PNJ
             for exit_room in getattr(self.current_room, 'exits', {}).values():
-                # Only consider actual Room objects (ignore 'interdit' or other markers)
+                # Ne considérez que les objets réels de la pièce (ignorez 'interdit' ou d’autres marqueurs)
                 if isinstance(exit_room, Room):
                     possible_exits.append(exit_room)
             if show_debug:
@@ -51,7 +51,7 @@ class character :
             #Le pnj peut se deplacer dans les salles de possible_exits 
             if possible_exits:
                 old_room = self.current_room
-                # pick a valid room (defensive: ensure it has characters attr)
+                # choisissez une salle valide (défensive : assurez-vous qu’elle a des personnages attr)
                 new_room = next((c for c in possible_exits if hasattr(c, 'characters')), None)
                 if new_room is None:
                     return False
