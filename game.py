@@ -131,13 +131,16 @@ class Game:
         # ############ SETUP DES PNJ/MONSTRES ############
         
         # NOTE : current_room doit être défini plus tard lors du placement
+        # Le Demogorgon sera créé et placé dans la Rue quand le joueur arrive au Club musique
+        # Pour le moment, on crée juste la référence mais on ne la place nulle part
         demogorgon = character("Démogorgon", "grand, grosse bouche avec plein de dents", None, ["Je serai le président de tous les français"])
         jean_bomber = character("jean bomber", "une personne classique", None, ["Salut !"])
 
-        # PLACEMENT DES PNJClub_musique
-        # Place le Démogorgon dans le Couloir 1
-        Club_musique.characters[demogorgon.name.lower()] = demogorgon
-        demogorgon.current_room = Club_musique
+        # PLACEMENT DES PNJ
+        # Le Démogorgon ne sera placé que quand le joueur entre dans le Club musique
+        # Pour l'instant, on stocke juste la référence dans le jeu
+        self.demogorgon = demogorgon
+        self.demogorgon_spawned = False
         Cafeteria.characters[jean_bomber.name.lower()] = jean_bomber
         jean_bomber.current_room = Cafeteria
 
@@ -156,7 +159,7 @@ class Game:
             title="Trouver la cafétaria",
             description="Explorez tous les lieux de ce monde mystérieux.",
             objectives=["Aller à Cafétéria"],
-            reward="Go tabasser un sandwich"
+            reward="Des sandwichs à gogo !"
         )
 
         
@@ -197,7 +200,7 @@ class Game:
             title="Se rendre dans la Rue", 
             description="Allez dans la Rue.", 
             objectives=["Aller à Rue"], 
-            reward="Gros ampoule au pied après avoir traversé la Rue mskn"
+            reward="1 km à pied, ça use, ça use..."
             )
         
         self.player.quest_manager.add_quest(se_rendre_rue)
@@ -226,20 +229,27 @@ class Game:
             # Obtenir la commande du joueur
             # réinitialiser le drapeau déplacé par tour PNJ
             self._pnjs_moved = False
+            self._should_move_pnjs = False
             self.process_command(input("> "))
 
-            # Déplacer PNJ seulement s’ils n’ont pas déjà été déplacés par une commande (par exemple, rester)
-            if not getattr(self, '_pnjs_moved', False):
+            # Déplacer PNJ seulement si la commande l'autorise (go, stay) ET s'ils n'ont pas déjà bougé
+            if getattr(self, '_should_move_pnjs', False) and not getattr(self, '_pnjs_moved', False):
+                moved_pnjs = getattr(self, '_pnjs_moved_this_turn', set())  # Récupérer les PNJ déjà bougés ce tour
                 for room in self.rooms:
                     for pnj in list(room.characters.values()):
-                        if pnj.name.lower() != "jean bomber":
+                        if pnj.name.lower() != "jean bomber" and id(pnj) not in moved_pnjs:
                             try:
                                 pnj.move(self)
+                                moved_pnjs.add(id(pnj))  # Marquer ce PNJ comme ayant bougé
                             except TypeError:
                                 pnj.move()
+                                moved_pnjs.add(id(pnj))
+                # Réinitialiser le set pour le prochain tour
+                self._pnjs_moved_this_turn = set()
             else:
                 # drapeau clair pour le prochain tour
                 self._pnjs_moved = False
+                self._pnjs_moved_this_turn = set()
 
     # Traiter la commande saisie par le joueur
     def process_command(self, command_string) -> None:
@@ -252,6 +262,10 @@ class Game:
              return None
              
         command_word = list_of_words[0].lower()
+
+        # Définir le flag pour savoir si les PNJ doivent se déplacer
+        # Les PNJ se déplacent SEULEMENT après 'go' ou 'stay'
+        self._should_move_pnjs = command_word in ('go', 'stay')
 
         # Si le joueur est mort, autorisez uniquement la fermeture
         try:
