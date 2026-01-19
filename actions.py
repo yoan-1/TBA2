@@ -83,6 +83,30 @@ class Actions:
         if moved:
             # Mettre à jour le compteur de déplacements
             player.move_count += 1
+            
+            # Si le joueur arrive au Club musique pour la première fois, faire apparaître le Demogorgon dans la Rue
+            try:
+                if player.current_room.name == 'Club musique' and not getattr(game, 'demogorgon_spawned', False):
+                    # Trouver la salle "Rue"
+                    rue_room = None
+                    for room in getattr(game, 'rooms', []) or []:
+                        if getattr(room, 'name', '') == 'Rue':
+                            rue_room = room
+                            break
+                    
+                    # Placer le Demogorgon dans la Rue
+                    if rue_room and hasattr(game, 'demogorgon'):
+                        demogorgon = game.demogorgon
+                        rue_room.characters[demogorgon.name.lower()] = demogorgon
+                        demogorgon.current_room = rue_room
+                        game.demogorgon_spawned = True
+                        # Marquer le Demogorgon comme ayant déjà bougé ce tour pour éviter un double déplacement
+                        if not hasattr(game, '_pnjs_moved_this_turn'):
+                            game._pnjs_moved_this_turn = set()
+                        game._pnjs_moved_this_turn.add(id(demogorgon))
+            except Exception:
+                pass
+            
             # Si c'est la première découverte de la salle, activer les quêtes liées
             if not was_visited:
                 player.quest_manager.activate_quests_for_room(player.current_room.name)
@@ -143,6 +167,8 @@ class Actions:
                             print("\nQuand vous rouvrez les yeux, vous êtes étendu au sol au même endroit.\n"
                                   "Autour de vous, des gens s'agitent comme si tout cela n'avait été qu'un rêve.\n"
                                   "Était-ce un songe ? Vous vous relevez, encore étourdi.")
+                            print("\nVous visité l'école et échapé au monstre de l'ESIEE ! Merci d'avoir joué au jeu !\n")
+                            game.finished = True
                             return moved
                         else:
                             print("\nVous vous jetez sur le monstre, mais il est bien trop fort.\n"
@@ -151,6 +177,9 @@ class Actions:
                         # ne pas supprimer le monstre, permettre de partir
             except Exception:
                 pass
+        
+        # Autoriser le déplacement des PNJ après cette commande
+        game._should_move_pnjs = True
         return moved
 
     def stay(game, list_of_words, number_of_parameters):
@@ -165,20 +194,25 @@ class Actions:
             return False
 
         # Déplacer PNJ/monstres maintenant (simuler un passage de tour)
+        # Garder trace des PNJ qui ont déjà bougé ce tour
+        moved_pnjs = set()
         try:
             for room in getattr(game, 'rooms', []) or []:
                 for pnj in list(getattr(room, 'characters', {}).values()):
-                    if pnj.name.lower() != "jean bomber":
+                    if pnj.name.lower() != "jean bomber" and id(pnj) not in moved_pnjs:
                         try:
                             pnj.move(game)
+                            moved_pnjs.add(id(pnj))
                         except TypeError:
                             pnj.move()
+                            moved_pnjs.add(id(pnj))
         except Exception:
             pass
 
         # Marquez que les PNJ ont déjà déménagé ce tour pour que Game.play ne les déplace pas à nouveau
         try:
             game._pnjs_moved = True
+            game._pnjs_moved_this_turn = set()
         except Exception:
             pass
 
@@ -233,6 +267,8 @@ class Actions:
                         print("\nQuand vous rouvrez les yeux, vous êtes étendu au sol au même endroit.\n"
                               "Autour de vous, des gens s'agitent comme si tout cela n'avait été qu'un rêve.\n"
                               "Était-ce un songe ? Vous vous relevez, encore étourdi.")
+                        print("\n*** VOUS AVEZ GAGNÉ ***\n")
+                        game.finished = True
                         return True
                     else:
                         print("\nVous vous jetez sur le monstre, mais il est bien trop fort.\n"
@@ -241,6 +277,8 @@ class Actions:
         except Exception:
             pass
 
+        # Autoriser le déplacement des PNJ après cette commande
+        game._should_move_pnjs = True
         return True
 
     def quit(game, list_of_words, number_of_parameters):

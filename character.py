@@ -24,7 +24,7 @@ class character :
         return f"\nVous êtes en face de {self.description}.\n"
     
     def move(self, game=None):
-        # Déterminer s’il faut afficher le débogage pour ce personnage (Demogorgon uniquement après que le joueur a 'monster_trunk')
+        # Déterminer s'il faut afficher le débogage pour ce personnage (Demogorgon uniquement après que le joueur a 'monster_trunk')
         try:
             norm_name = ''.join(c for c in unicodedata.normalize('NFD', self.name).lower() if unicodedata.category(c) != 'Mn')
         except Exception:
@@ -39,58 +39,69 @@ class character :
             except Exception:
                 show_debug = False
 
-        if random.choice([True, False]):
-            possible_exits=[]
-            #On regarde quelles sont les sorties possibles de la salle ds lequel est le PNJ
-            for exit_room in getattr(self.current_room, 'exits', {}).values():
-                # Ne considérez que les objets réels de la pièce (ignorez 'interdit' ou d’autres marqueurs)
-                if isinstance(exit_room, Room):
-                    possible_exits.append(exit_room)
-            if show_debug:
-                print(f"DEBUG: {self.name} peut se déplacer à {len(possible_exits)} endroit(s).")
-            #Le pnj peut se deplacer dans les salles de possible_exits 
-            if possible_exits:
-                old_room = self.current_room
-                # choisissez une salle valide (défensive : assurez-vous qu’elle a des personnages attr)
-                new_room = next((c for c in possible_exits if hasattr(c, 'characters')), None)
-                if new_room is None:
-                    return False
-
-                if self.name.lower() in getattr(old_room, 'characters', {}):
-                    try:
-                        del old_room.characters[self.name.lower()]
-                    except Exception:
-                        pass
-
-                new_room.characters[self.name.lower()] = self
-
-                self.current_room= new_room
-
-                if show_debug:
-                    try:
-                        print(f"DEBUG: {self.name} s'est déplacé de {old_room.name} vers {new_room.name}")
-                    except Exception:
-                        print(f"DEBUG: {self.name} s'est déplacé.")
-                return True
-            if show_debug:
+        # Récupérer toutes les sorties possibles
+        possible_exits = []
+        for direction, exit_room in getattr(self.current_room, 'exits', {}).items():
+            # Ne considérez que les objets réels de la pièce (ignorez 'interdit' ou d'autres marqueurs)
+            if isinstance(exit_room, Room):
+                # Exclure le Club musique pour le Demogorgon
                 try:
-                    print(f"DEBUG: {self.name} n'a pas pu se déplacer (aucune sortie).")
+                    norm_name_exit = ''.join(c for c in unicodedata.normalize('NFD', exit_room.name.lower()) if unicodedata.category(c) != 'Mn')
+                    if 'demogorgon' in norm_name and norm_name_exit == 'club musique':
+                        continue  # Sauter le Club musique
                 except Exception:
-                    print(f"DEBUG: {self.name} n'a pas pu se déplacer.")
-            return True
-        else:
+                    pass
+                possible_exits.append(exit_room)
+            elif show_debug:
+                print(f"DEBUG: Sortie '{direction}' invalide ou None")
+        
+        # Créer une liste de choix : [rester, exit1, exit2, ...]
+        # "rester" est représenté par None
+        choices = [None] + possible_exits  # None = rester
+        
+        if show_debug:
+            print(f"DEBUG: {self.name} a {len(choices)} option(s) : {len(possible_exits)} sortie(s) ou rester.")
+        
+        # Choisir aléatoirement parmi toutes les options
+        choice = random.choice(choices)
+        
+        # Si choice est None, le PNJ reste sur place
+        if choice is None:
             if show_debug:
                 try:
-                    print(f"DEBUG: {self.name} est resté dans {getattr(self.current_room, 'name', 'une salle')}")
+                    print(f"DEBUG: {self.name} est resté dans {self.current_room.name}")
                 except Exception:
                     print(f"DEBUG: {self.name} est resté.")
             return False
-        return False
+        
+        # Sinon, se déplacer vers la salle choisie
+        new_room = choice
+        
+        # Vérifiez que la salle a bien l'attribut 'characters'
+        if not hasattr(new_room, 'characters'):
+            return False
+
+        old_room = self.current_room
+        if self.name.lower() in getattr(old_room, 'characters', {}):
+            try:
+                del old_room.characters[self.name.lower()]
+            except Exception:
+                pass
+
+        new_room.characters[self.name.lower()] = self
+        self.current_room = new_room
+
+        if show_debug:
+            try:
+                print(f"DEBUG: {self.name} s'est déplacé de {old_room.name} vers {new_room.name}")
+            except Exception:
+                print(f"DEBUG: {self.name} s'est déplacé.")
+        return True
 
 
 
 
 if __name__ == "__main__":
     # Bloc de test corrigé
-    PNJ = character("PNJ", "un étudiant souriant", "La Rue", ["Salut à toi !"]) 	
+    PNJ = character("PNJ", "un étudiant souriant", "La Rue", ["Salut à toi !"]) 
     print(PNJ)
