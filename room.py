@@ -11,6 +11,8 @@ class Room:
         self.characters = {}
         # Indique si la porte d'entrée vers cette salle est verrouillée
         self.locked = False
+        # Image file name for GUI (optional)
+        self.image = None
 
     def get_exit(self, direction):
         # Direct access to exits mapping is sufficient; this helper was unused.
