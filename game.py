@@ -1,6 +1,6 @@
-# Description: classe game
+"""Module définissant la classe Game - gestionnaire principal du jeu d'aventure."""
 
-# Importation des  modules
+# Importation des modules
 import sys
 import tkinter as tk
 from tkinter import simpledialog
@@ -11,35 +11,44 @@ from room import Room
 from player import Player
 from command import Command
 from actions import Actions
-from character import character 
-from quest import Quest 
+from character import Character
+from quest import Quest
 from item import Item
-class Game:
 
-    # Constructor
+
+class Game:
+    """Gestionnaire principal du jeu avec la logique, les salles et l'interface."""
+
+
+    # Constructeur
     def __init__(self):
         self.finished = False
         self.rooms = []
         self.commands = {}
         self.player = None
-        
-    
-    # Setup the game
+
+
+    # Configurer le jeu
     def setup(self, player_name=None):
 
-        # Setup commandes
+        # Configurer les commandes
 
         help = Command("help", " : afficher cette aide", Actions.help, 0)
         self.commands["help"] = help
         quit = Command("quit", " : quitter le jeu", Actions.quit, 0)
         self.commands["quit"] = quit
-        go = Command("go", " <direction> : se déplacer dans une direction cardinale (N, E, S, O)", Actions.go, 1)
+        go = Command(
+            "go",
+            " <direction> : se déplacer dans une direction cardinale (N, E, S, O)",
+            Actions.go,
+            1
+        )
         self.commands["go"] = go
         check = Command("check", " : afficher votre inventaire", Actions.inventory, 0)
         self.commands["check"] = check
         back = Command("back"," : Vous permet de revenir en arrière", Actions.back, 0)
         self.commands["back"] = back
-        look = Command("look"," : regarder autour de soi", Actions.look, 0) 
+        look = Command("look"," : regarder autour de soi", Actions.look, 0)
         self.commands["look"] = look
         speak = Command("speak", " <nom_pnj> : parler à un PNJ", Actions.speak, 1)
         self.commands["speak"] = speak
@@ -54,36 +63,59 @@ class Game:
         self.commands["quests"] = quests
         quest = Command("quest", " <titre> : afficher les détails d'une quête", Actions.quest, 1)
         self.commands["quest"] = quest
-        activate = Command("activate", " <num> : activer une quête (utiliser le numéro)", Actions.activate, 1, hidden=False)
+        activate = Command(
+            "activate",
+            " <num> : activer une quête (utiliser le numéro)",
+            Actions.activate,
+            1,
+            hidden=False
+        )
         self.commands["activate"] = activate
         rewards = Command("rewards", " : afficher vos récompenses", Actions.rewards, 0)
         self.commands["rewards"] = rewards
         stay = Command("stay", " : rester sur place (fait avancer le monde)", Actions.stay, 0)
         self.commands["stay"] = stay
-        
-        # Setup rooms
 
-        
-        Salle_1 = Room("Salle 1", "dans la Salle 1. La course d'orientation débute !\n\nProfesseur : Pensez à récupérer les consignes !")
+        # Configurer les salles
+
+
+        Salle_1 = Room(
+            "Salle 1",
+            "dans la Salle 1. La course d'orientation débute !\n\n"
+            "Professeur : Pensez à récupérer les consignes !"
+        )
         self.rooms.append(Salle_1)
         Salle_3 = Room("Salle 3", "dans la Salle 3.")
         self.rooms.append(Salle_3)
-        Couloir_1 = Room("Couloir 1", "dans le Couloir 1. Vous voyez des portes tout autour de vous.")
+        Couloir_1 = Room(
+            "Couloir 1",
+            "dans le Couloir 1. Vous voyez des portes tout autour de vous."
+        )
         self.rooms.append(Couloir_1)
         # Salle 2 existe mais est initialement verrouillée
         Salle_2 = Room("Salle 2", "dans la Salle 2. La porte est verrouillée.")
         Salle_2.locked = True
         self.rooms.append(Salle_2)
 
-        Couloir_2 = Room("couloir 2", "dans le Couloir 2. Vous voyez des portes tout autour de vous.")
+        Couloir_2 = Room(
+            "couloir 2",
+            "dans le Couloir 2. Vous voyez des portes tout autour de vous."
+        )
         self.rooms.append(Couloir_2)
         jardin = Room("Jardin", "dans le jardin de l'ESIEE.")
         self.rooms.append(jardin)
-        Rue = Room("Rue", "dans la rue de l'ESIEE. Vous voyez une grande allée et pleins d'endroits où aller")
+        Rue = Room(
+            "Rue",
+            "dans la rue de l'ESIEE. Vous voyez une grande allée "
+            "et pleins d'endroits où aller"
+        )
         self.rooms.append(Rue)
         Cafeteria = Room("Cafétéria", "dans la cafétéria.")
         self.rooms.append(Cafeteria)
-        Club_musique = Room("Club musique", "dans le club de musique. Une ambiance étrange survient...")
+        Club_musique = Room(
+            "Club musique",
+            "dans le club de musique. Une ambiance étrange survient..."
+        )
         self.rooms.append(Club_musique)
         Marcel = Room("Marcel Dassault", "Vous êtes dans la salle Marcel Dassault.")
         self.rooms.append(Marcel)
@@ -92,54 +124,99 @@ class Game:
         Escaliers2= Room("Escalier 2", "dans l'escalier 2.")
         self.rooms.append(Escaliers2)
         Parking= Room("Parking", "sur le parking. Vous voyez des voitures garées un peu partout.")
-        self.rooms.append(Parking) 
+        self.rooms.append(Parking)
         # Le joueur a pu laisser quelque chose sur le parking (bouclier)
-        Parking.inventory['bouclier'] = Item('bouclier', "un bouclier robuste que vous aviez laissé sur le parking", 4.0)
-        Parking_2= Room("Parking 2", "sur le parking. Vous voyez des voitures garées un peu partout.")
+        Parking.inventory['bouclier'] = Item(
+            'bouclier',
+            "un bouclier robuste que vous aviez laissé sur le parking",
+            4.0
+        )
+        Parking_2 = Room(
+            "Parking 2",
+            "sur le parking. Vous voyez des voitures garées un peu partout."
+        )
         self.rooms.append(Parking_2)
-        # Le sac contenant le monster_trunk (accessible si on a déjà visité le Club musique)
-        Parking_2.inventory['sac'] = Item('sac', "un sac à dos usé qui semble contenir quelque chose", 1.0)
+        # Le sac contenant le monster_trunk
+        # (accessible si on a déjà visité le Club musique)
+        Parking_2.inventory['sac'] = Item(
+            'sac',
+            "un sac à dos usé qui semble contenir quelque chose",
+            1.0
+        )
 
         # ############   ITEMS   ############
         # Le poids est à définir
-       
-       
+
+
         Club_musique.inventory['clé'] = Item('clé', "une petite clé dorée", 0.1)
-        Salle_1.inventory['consignes'] = Item('consignes', "Une feuille avec des consignes pour bien débuter la course d'orientation", 0.2)
-        Salle_1.inventory['consignes'].description = "Une feuille indiquant les pièces à découvrir : Rue, Cafétaria, Club musique"
-        Salle_3.inventory['survêt'] = Item('survêt', 'On voit le survêtement rouge de Louis tahhh le tripaloski et les années 80', 0.2)
+        Salle_1.inventory['consignes'] = Item(
+            'consignes',
+            "Une feuille avec des consignes pour bien débuter "
+            "la course d'orientation",
+            0.2
+        )
+        Salle_1.inventory['consignes'].description = (
+            "Une feuille indiquant les pièces à découvrir : "
+            "Rue, Cafétaria, Club musique"
+        )
+        Salle_3.inventory['survêt'] = Item(
+            'survêt',
+            'On voit le survêtement rouge de Louis tahhh '
+            'le tripaloski et les années 80',
+            0.2
+        )
         # Dans la Salle 2 se trouve une carte brillante montrant une croix indiquant
         # un emplacement dans le Jardin (la croix marque l'endroit où se trouve l'épée).
-        Salle_2.inventory['carte'] = Item('carte', "une carte brillante avec une croix marquant un emplacement dans le Jardin", 0.1)
+        Salle_2.inventory['carte'] = Item(
+            'carte',
+            "une carte brillante avec une croix marquant "
+            "un emplacement dans le Jardin",
+            0.1
+        )
         # Placer l'épée dans le jardin à l'emplacement indiqué par la croix
-        jardin.inventory['épée'] = Item('épée', "une épée brillante plantée dans le sol, à l'endroit marqué d'une croix sur une carte", 3.0)
+        jardin.inventory['épée'] = Item(
+            'épée',
+            "une épée brillante plantée dans le sol, "
+            "à l'endroit marqué d'une croix sur une carte",
+            3.0
+        )
 
         # Créer des sorties pour les rooms
 
         Salle_1.exits = { "N" : Couloir_1}
         # La sortie nord du Couloir 1 mène à Salle 2, mais Salle 2 est verrouillée au départ
-        Couloir_1.exits = {"O": jardin, "N" : Salle_2, "E" : Rue, "S" : Escaliers1}             
+        Couloir_1.exits = {"O": jardin, "N" : Salle_2, "E" : Rue, "S" : Escaliers1}
         jardin.exits = {"E" : Couloir_1}
         Rue.exits={"O" : Couloir_1, "E" : Couloir_2, "S" : Cafeteria}
         Couloir_2.exits={"N" : Salle_3, "O": jardin, "E" : Rue, "S" : Escaliers2}
         # Connecter Salle 2 au Couloir 1
         Salle_2.exits = {"S": Couloir_1}
-        Salle_3.exits={"S" : Couloir_2} 
-        Cafeteria.exits={"N" : Rue} 
+        Salle_3.exits={"S" : Couloir_2}
+        Cafeteria.exits={"N" : Rue}
         Club_musique.exits={"N" : Parking_2}
         Escaliers1.exits={"N" : Couloir_1, "S" : Parking}
-        Escaliers2.exits={"N" : Couloir_2, "S" : Parking}  
+        Escaliers2.exits={"N" : Couloir_2, "S" : Parking}
         Parking.exits={"N" : Escaliers1, "O" : Escaliers2, "S" : Club_musique}
         Parking_2.exits={"N" : Escaliers1, "O" : Escaliers2}
         Marcel.exits={"N": Rue, "S": Rue}
 
         # ############ SETUP DES PNJ/MONSTRES ############
-        
+
         # NOTE : current_room doit être défini plus tard lors du placement
         # Le Demogorgon sera créé et placé dans la Rue quand le joueur arrive au Club musique
         # Pour le moment, on crée juste la référence mais on ne la place nulle part
-        demogorgon = character("Démogorgon", "grand, grosse bouche avec plein de dents", None, ["Je serai le président de tous les français"])
-        jean_bomber = character("jean bomber", "une personne classique", None, ["Salut !"])
+        demogorgon = Character(
+            "Démogorgon",
+            "grand, grosse bouche avec plein de dents",
+            None,
+            ["Je serai le président de tous les français"]
+        )
+        jean_bomber = Character(
+            "jean bomber",
+            "une personne classique",
+            None,
+            ["Salut !"]
+        )
 
         # PLACEMENT DES PNJ
         # Le Démogorgon ne sera placé que quand le joueur entre dans le Club musique
@@ -158,7 +235,7 @@ class Game:
         self.player.current_room = Salle_1
         self.player.history.append(self.player.current_room)
         self.player.quest_manager.player = self.player
-        
+
         self._setup_quests()
 
     def _setup_quests(self):
@@ -169,7 +246,7 @@ class Game:
             reward="Des sandwichs à gogo !"
         )
 
-        
+
         # 1) Quête d'item : récupérer une clé dans le club musique
         key_quest = Quest(
             title="Récupérer la clé du Club musique",
@@ -194,22 +271,22 @@ class Game:
             objectives=["speak jean bomber"],
             reward=map_reward
         )
-    
-        
+
+
         aller_dehors = Quest(
             title="Aller dehors",
-            description="Sortez dehors.", 
-            objectives=["Aller à dehors"], 
+            description="Sortez dehors.",
+            objectives=["Aller à dehors"],
             reward="Sortie réussie"
             )
-        
+
         se_rendre_rue = Quest(
-            title="Se rendre dans la Rue", 
-            description="Allez dans la Rue.", 
-            objectives=["Aller à Rue"], 
+            title="Se rendre dans la Rue",
+            description="Allez dans la Rue.",
+            objectives=["Aller à Rue"],
             reward="1 km à pied, ça use, ça use..."
             )
-        
+
         self.player.quest_manager.add_quest(se_rendre_rue)
         self.player.quest_manager.add_quest(jean_bomber_quest)
         jean_bomber_quest.activation_rooms = ['Cafétéria']
@@ -217,7 +294,7 @@ class Game:
         self.player.quest_manager.add_quest(key_quest)
         self.player.quest_manager.add_quest(interact_jean)
         self.player.quest_manager.add_quest(aller_dehors)
-        
+
 
         # Les quêtes suivantes s'activent en récupérant l'objet 'consignes'
         for q in self.player.quest_manager.get_all_quests():
@@ -229,6 +306,7 @@ class Game:
 
     # Jouer au jeu
     def play(self):
+        """Lance la boucle principale du jeu en mode console."""
         self.setup()
         self.print_welcome()
         # Boucle jusqu’à ce que le jeu soit terminé
@@ -247,7 +325,8 @@ class Game:
                         if pnj.name.lower() != "jean bomber" and id(pnj) not in moved_pnjs:
                             try:
                                 pnj.move(self)
-                                moved_pnjs.add(id(pnj))  # Marquer ce PNJ comme ayant bougé
+                                # Marquer ce PNJ comme ayant bougé
+                                moved_pnjs.add(id(pnj))
                             except TypeError:
                                 pnj.move()
                                 moved_pnjs.add(id(pnj))
@@ -260,6 +339,7 @@ class Game:
 
     # Traiter la commande saisie par le joueur
     def process_command(self, command_string) -> None:
+        """Traite et exécute une commande tapée par le joueur."""
 
         # Diviser la chaîne de commande en une liste de mots
         list_of_words = command_string.split(" ")
@@ -267,7 +347,7 @@ class Game:
         # Assurer que command_word n'est pas vide
         if not list_of_words or not list_of_words[0]:
              return None
-             
+
         command_word = list_of_words[0].lower()
 
         # Définir le flag pour savoir si les PNJ doivent se déplacer
@@ -287,7 +367,7 @@ class Game:
             # Ajout du message d'erreur
             print(f"\nCommande '{command_word}' non reconnue. Entrez 'help' pour voir la liste des commandes disponibles.\n")
             return None
-            
+
         # Si la commande est reconnue, exécutez-la
         else:
             command = self.commands[command_word]
@@ -295,13 +375,21 @@ class Game:
 
     # Imprimer le message de bienvenue
     def print_welcome(self):
-        print(f"\nBienvenue {self.player.name} dans ce jeu pédagogique qui te permettra de découvrir l'ESIEE !\n\nenfin.... on l'espère...\n\n")
-        print("Rentrer 'help' te permettra d'afficher la liste des commandes nécessaires pour évoluer dans le jeu.")
-        
+        """Affiche le message de bienvenue et les instructions."""
+        print(
+            f"\nBienvenue {self.player.name} dans ce jeu pédagogique "
+            "qui te permettra de découvrir l'ESIEE !\n\n"
+            "enfin.... on l'espère...\n\n"
+        )
+        print(
+            "Rentrer 'help' te permettra d'afficher la liste "
+            "des commandes nécessaires pour évoluer dans le jeu."
+        )
+
         #
         print(self.player.current_room.get_long_description())
 
-   
+
 ##############################
     # Créer un objet de jeu et jouer le jeu
 ##############################
@@ -329,30 +417,30 @@ class _InputRedirector:
         self.gui = gui
         self.waiting_for_input = False
         self.input_result = None
-    
+
     def __call__(self, prompt=""):
         """Wait for user input via the entry field."""
         if prompt:
             # Display the prompt in the output
             print(prompt, end="")
-        
+
         # Set flag that we're waiting for input
         self.waiting_for_input = True
         self.input_result = None
-        
+
         # Wait for the user to submit input via the entry field
         self.gui.wait_variable(self.gui.input_ready_var)
-        
+
         # Get the result
         result = self.input_result if self.input_result is not None else ""
-        
+
         # Reset flags
         self.waiting_for_input = False
         self.input_result = None
-        
+
         # Echo the response
         print(result)
-        
+
         return result
 
 
@@ -576,14 +664,14 @@ class GameGUI(tk.Tk):
     def _build_info_panel(self):
         # Titre
         ttk.Label(self.info_panel, text="Infos Joueur", font=("Helvetica", 13, "bold")).pack(pady=(0,8))
-        
+
         # Sorties disponibles
         self.exits_label = ttk.Label(self.info_panel, text="Sorties disponibles :", font=("Helvetica", 10, "bold"))
         self.exits_label.pack(anchor="w")
         self.exits_text = tk.Text(self.info_panel, height=3, width=25, bg="#f0f0f0", fg="#000", font=("Helvetica", 9))
         self.exits_text.pack(fill="x", padx=2, pady=(0,8))
         self.exits_text.config(state="disabled")
-        
+
         # Inventaire
         self.inv_label = ttk.Label(self.info_panel, text="Inventaire :", font=("Helvetica", 10, "bold"))
         self.inv_label.pack(anchor="w")
@@ -626,7 +714,7 @@ class GameGUI(tk.Tk):
         else:
             self.exits_text.insert("1.0", "Aucune sortie")
         self.exits_text.config(state="disabled")
-        
+
         # Inventaire
         self.inv_list.delete(0, tk.END)
         if self.game.player and self.game.player.inventory:
@@ -687,10 +775,10 @@ class GameGUI(tk.Tk):
         """Handle Enter key press in the entry field."""
         value = self.entry_var.get().strip()
         self.entry_var.set("")
-        
+
         if not value:
             return
-        
+
         # Check if we're waiting for input (from a prompt)
         if self.input_redirector and self.input_redirector.waiting_for_input:
             # Store the input result
@@ -709,20 +797,20 @@ class GameGUI(tk.Tk):
             return
         # Echo the command in output area
         print(f"> {command}\n")
-        
+
         # Stocker la commande pour vérification ultérieure
         self._last_command = command.strip().lower()
-        
+
         # Process command in a separate thread to avoid blocking the GUI
         import threading
         def process():
             self.game.process_command(command)
             # Schedule UI update on main thread
             self.after(0, self._update_after_command)
-        
+
         thread = threading.Thread(target=process, daemon=True)
         thread.start()
-    
+
     def _update_after_command(self):
         """Update UI after command execution."""
         self._update_room_image()
@@ -735,39 +823,39 @@ class GameGUI(tk.Tk):
         """Handle Take button - show dialog to select item from room."""
         if self.game.finished:
             return
-        
+
         room = self.game.player.current_room
         if not room or not room.inventory:
             print("\nIl n'y a rien à prendre ici.\n")
             return
-        
+
         # Create a dialog window for item selection
         dialog = tk.Toplevel(self)
         dialog.title("Prendre un objet")
         dialog.geometry("400x300")
         dialog.transient(self)
         dialog.grab_set()
-        
+
         ttk.Label(dialog, text="Choisissez un objet à prendre :", font=("Helvetica", 11, "bold")).pack(pady=10)
-        
+
         # Listbox with scrollbar
         frame = ttk.Frame(dialog)
         frame.pack(fill="both", expand=True, padx=10, pady=5)
-        
+
         scrollbar = ttk.Scrollbar(frame)
         scrollbar.pack(side="right", fill="y")
-        
+
         listbox = tk.Listbox(frame, yscrollcommand=scrollbar.set, font=("Helvetica", 10))
         listbox.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=listbox.yview)
-        
+
         # Populate with room items
         items = list(room.inventory.keys())
         for item_name in items:
             item = room.inventory[item_name]
             desc = getattr(item, 'description', 'objet')
             listbox.insert(tk.END, f"{item_name} - {desc}")
-        
+
         def on_select():
             selection = listbox.curselection()
             if selection:
@@ -777,13 +865,13 @@ class GameGUI(tk.Tk):
                 self._send_command(f"take {item_name}")
             else:
                 print("\nAucun objet sélectionné.\n")
-        
+
         # Buttons
         btn_frame = ttk.Frame(dialog)
         btn_frame.pack(pady=10)
         ttk.Button(btn_frame, text="Prendre", command=on_select).pack(side="left", padx=5)
         ttk.Button(btn_frame, text="Annuler", command=dialog.destroy).pack(side="left", padx=5)
-        
+
         # Double-click to select
         listbox.bind('<Double-Button-1>', lambda e: on_select())
 
@@ -791,39 +879,39 @@ class GameGUI(tk.Tk):
         """Handle Drop button - show dialog to select item from inventory."""
         if self.game.finished:
             return
-        
+
         player = self.game.player
         if not player.inventory:
             print("\nVotre inventaire est vide.\n")
             return
-        
+
         # Create a dialog window for item selection
         dialog = tk.Toplevel(self)
         dialog.title("Déposer un objet")
         dialog.geometry("400x300")
         dialog.transient(self)
         dialog.grab_set()
-        
+
         ttk.Label(dialog, text="Choisissez un objet à déposer :", font=("Helvetica", 11, "bold")).pack(pady=10)
-        
+
         # Listbox with scrollbar
         frame = ttk.Frame(dialog)
         frame.pack(fill="both", expand=True, padx=10, pady=5)
-        
+
         scrollbar = ttk.Scrollbar(frame)
         scrollbar.pack(side="right", fill="y")
-        
+
         listbox = tk.Listbox(frame, yscrollcommand=scrollbar.set, font=("Helvetica", 10))
         listbox.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=listbox.yview)
-        
+
         # Populate with player items
         items = list(player.inventory.keys())
         for item_name in items:
             item = player.inventory[item_name]
             desc = getattr(item, 'description', 'objet')
             listbox.insert(tk.END, f"{item_name} - {desc}")
-        
+
         def on_select():
             selection = listbox.curselection()
             if selection:
@@ -833,13 +921,13 @@ class GameGUI(tk.Tk):
                 self._send_command(f"drop {item_name}")
             else:
                 print("\nAucun objet sélectionné.\n")
-        
+
         # Buttons
         btn_frame = ttk.Frame(dialog)
         btn_frame.pack(pady=10)
         ttk.Button(btn_frame, text="Déposer", command=on_select).pack(side="left", padx=5)
         ttk.Button(btn_frame, text="Annuler", command=dialog.destroy).pack(side="left", padx=5)
-        
+
         # Double-click to select
         listbox.bind('<Double-Button-1>', lambda e: on_select())
 
@@ -847,37 +935,37 @@ class GameGUI(tk.Tk):
         """Handle Speak button - show dialog to select NPC."""
         if self.game.finished:
             return
-        
+
         room = self.game.player.current_room
         if not room or not room.characters:
             print("\nIl n'y a personne ici avec qui parler.\n")
             return
-        
+
         # Create a dialog window for NPC selection
         dialog = tk.Toplevel(self)
         dialog.title("Parler à un PNJ")
         dialog.geometry("400x250")
         dialog.transient(self)
         dialog.grab_set()
-        
+
         ttk.Label(dialog, text="Choisissez un PNJ :", font=("Helvetica", 11, "bold")).pack(pady=10)
-        
+
         # Listbox with scrollbar
         frame = ttk.Frame(dialog)
         frame.pack(fill="both", expand=True, padx=10, pady=5)
-        
+
         scrollbar = ttk.Scrollbar(frame)
         scrollbar.pack(side="right", fill="y")
-        
+
         listbox = tk.Listbox(frame, yscrollcommand=scrollbar.set, font=("Helvetica", 10))
         listbox.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=listbox.yview)
-        
+
         # Populate with NPCs
         npcs = list(room.characters.values())
         for npc in npcs:
             listbox.insert(tk.END, npc.name)
-        
+
         def on_select():
             selection = listbox.curselection()
             if selection:
@@ -887,13 +975,13 @@ class GameGUI(tk.Tk):
                 self._send_command(f"speak {npc_name}")
             else:
                 print("\nAucun PNJ sélectionné.\n")
-        
+
         # Buttons
         btn_frame = ttk.Frame(dialog)
         btn_frame.pack(pady=10)
         ttk.Button(btn_frame, text="Parler", command=on_select).pack(side="left", padx=5)
         ttk.Button(btn_frame, text="Annuler", command=dialog.destroy).pack(side="left", padx=5)
-        
+
         # Double-click to select
         listbox.bind('<Double-Button-1>', lambda e: on_select())
 
@@ -901,14 +989,14 @@ class GameGUI(tk.Tk):
         """Handle Quest button - show dialog to enter quest title."""
         if self.game.finished:
             return
-        
+
         # Ask for quest title
         quest_title = simpledialog.askstring(
             "Détails de quête",
             "Entrez le titre de la quête :",
             parent=self
         )
-        
+
         if quest_title:
             self._send_command(f"quest {quest_title}")
 
@@ -916,14 +1004,14 @@ class GameGUI(tk.Tk):
         """Handle Activate button - show dialog to enter quest number."""
         if self.game.finished:
             return
-        
+
         # Ask for quest number
         quest_num = simpledialog.askstring(
             "Activer une quête",
             "Entrez le numéro de la quête à activer :",
             parent=self
         )
-        
+
         if quest_num:
             self._send_command(f"activate {quest_num}")
 
@@ -957,5 +1045,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

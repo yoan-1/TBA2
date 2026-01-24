@@ -1,3 +1,14 @@
+"""Module d'actions pour le jeu.
+
+Ce module contient la classe Actions avec toutes les commandes
+exécutables par le joueur.
+"""
+
+import unicodedata
+from item import Item
+
+
+
 # Description : Le module d’actions.
 
 # Le module actions contient les fonctions appelées lorsqu’une commande est exécutée.
@@ -16,8 +27,6 @@ MSG0 = "\nLa commande '{command_word}' ne prend pas de paramètre.\n"
 # La variable MSG1 est utilisée lorsque la commande prend 1 paramètre.
 MSG1 = "\nLa commande '{command_word}' prend 1 seul paramètre.\n"
 
-from item import Item
-import unicodedata
 
 class Actions:
 
@@ -35,7 +44,7 @@ class Actions:
             bool: True if the command was executed successfully, False otherwise.
 
         Examples:
-        
+
         >>> from game import Game
         >>> game = Game()
         >>> game.setup()
@@ -47,7 +56,7 @@ class Actions:
         False
 
         """
-        
+
         player = game.player
         l = len(list_of_words)
         # Si le nombre de paramètres est incorrect, affiche un message d’erreur et renvoie False.
@@ -83,38 +92,45 @@ class Actions:
         if moved:
             # Mettre à jour le compteur de déplacements
             player.move_count += 1
-            
+
             # Si le joueur arrive au Club musique pour la première fois, faire apparaître le Demogorgon dans la Rue
             try:
-                if player.current_room.name == 'Club musique' and not getattr(game, 'demogorgon_spawned', False):
+                room_name = player.current_room.name
+                if room_name == 'Club musique' and not getattr(
+                    game, 'demogorgon_spawned', False):
                     # Trouver la salle "Rue"
                     rue_room = None
-                    for room in getattr(game, 'rooms', []) or []:
+                    rooms_list = getattr(game, 'rooms', []) or []
+                    for room in rooms_list:
                         if getattr(room, 'name', '') == 'Rue':
                             rue_room = room
                             break
-                    
+
                     # Placer le Demogorgon dans la Rue
                     if rue_room and hasattr(game, 'demogorgon'):
                         demogorgon = game.demogorgon
                         rue_room.characters[demogorgon.name.lower()] = demogorgon
                         demogorgon.current_room = rue_room
                         game.demogorgon_spawned = True
-                        # Marquer le Demogorgon comme ayant déjà bougé ce tour pour éviter un double déplacement
+                        # Marquer le Demogorgon comme ayant déjà bougé
+                        # ce tour pour éviter un double déplacement
                         if not hasattr(game, '_pnjs_moved_this_turn'):
                             game._pnjs_moved_this_turn = set()
                         game._pnjs_moved_this_turn.add(id(demogorgon))
             except Exception:
                 pass
-            
+
             # Si c'est la première découverte de la salle, activer les quêtes liées
             if not was_visited:
-                player.quest_manager.activate_quests_for_room(player.current_room.name)
+                room_name_val = player.current_room.name
+            player.quest_manager.activate_quests_for_room(
+                room_name_val)
 
             # Vérifier les objectifs liés aux pièces visitées (pour les quêtes actives)
             player.quest_manager.check_room_objectives(player.current_room.name)
             # Vérifier les objectifs de type compteur (ex: Se déplacer X fois)
-            player.quest_manager.check_counter_objectives("Se déplacer", player.move_count)
+            player.quest_manager.check_counter_objectives(
+                "Se déplacer", player.move_count)
             # Si le joueur possède un 'monster_trunk', afficher la position actuelle du monstre
             try:
                 inv = getattr(player, 'inventory', {}) or {}
@@ -172,12 +188,14 @@ class Actions:
                             return moved
                         else:
                             print("\nVous vous jetez sur le monstre, mais il est bien trop fort.\n"
-                                  "Vous vous en sortez de justesse, épuisé. Vous vous rappelez alors avoir laissé quelque chose sur le Parking qui pourrait vous aider (un bouclier).\n"
+                                  "Vous vous en sortez de justesse, épuisé. "
+                              "Vous vous rappelez alors avoir laissé quelque chose "
+                              "sur le Parking qui pourrait vous aider (un bouclier).\n"
                                   "Revenez au Parking pour récupérer ce bouclier avant de l'affronter à nouveau.")
                         # ne pas supprimer le monstre, permettre de partir
             except Exception:
                 pass
-        
+
         # Autoriser le déplacement des PNJ après cette commande
         game._should_move_pnjs = True
         return moved
@@ -241,7 +259,13 @@ class Actions:
         # Si le monstre est maintenant dans la même pièce, proposez une confrontation
         try:
             chars = getattr(player.current_room, 'characters', {}) or {}
-            if any('demogorgon' in (''.join(c for c in __import__('unicodedata').normalize('NFD', n).lower() if __import__('unicodedata').category(c) != 'Mn')) for n in chars.keys()):
+            demog_check = any(
+                'demogorgon' in (''.join(
+                    c for c in __import__('unicodedata').normalize(
+                        'NFD', n).lower()
+                    if __import__('unicodedata').category(c) != 'Mn'))
+                for n in chars.keys())
+            if demog_check:
                 choice = input("\nVoulez-vous engager le combat ?\n1-oui\n2-non\n> ").strip().lower()
                 if '2' in choice or 'non' in choice:
                     print("\nVous avez hésité et le monstre vous a terrassé. Vous êtes mort.")
@@ -272,7 +296,9 @@ class Actions:
                         return True
                     else:
                         print("\nVous vous jetez sur le monstre, mais il est bien trop fort.\n"
-                              "Vous vous en sortez de justesse, épuisé. Vous vous rappelez alors avoir laissé quelque chose sur le Parking qui pourrait vous aider (un bouclier).\n"
+                              "Vous vous en sortez de justesse, épuisé. "
+                              "Vous vous rappelez alors avoir laissé quelque chose "
+                              "sur le Parking qui pourrait vous aider (un bouclier).\n"
                               "Revenez au Parking pour récupérer ce bouclier avant de l'affronter à nouveau.")
         except Exception:
             pass
@@ -282,14 +308,14 @@ class Actions:
         return True
 
     def quit(game, list_of_words, number_of_parameters):
-        
+
         l = len(list_of_words)
         # Si le nombre de paramètres est incorrect, affiche un message d’erreur et renvoie False.
         if l != number_of_parameters + 1:
             command_word = list_of_words[0]
             print(MSG0.format(command_word=command_word))
             return False
-        
+
         # Définissez l’attribut terminé de l’objet du jeu sur True.
         player = game.player
         msg = f"\nMerci {player.name} d'avoir joué. Au revoir.\n"
@@ -298,14 +324,14 @@ class Actions:
         return True
 
     def help(game, list_of_words, number_of_parameters):
-        
+
         # Si le nombre de paramètres est incorrect, affiche un message d’erreur et renvoie False.
         l = len(list_of_words)
         if l != number_of_parameters + 1:
             command_word = list_of_words[0]
             print(MSG0.format(command_word=command_word))
             return False
-        
+
         # Afficher la liste des commandes disponibles (ignorer les commandes masquées)
         print("\nVoici les commandes disponibles:")
         for command in game.commands.values():
@@ -316,6 +342,7 @@ class Actions:
         return True
 
     def back(game, list_of_words, number_of_parameters):
+        """Retourne à la salle précédente."""
         l = len(list_of_words)
         # Si le nombre de paramètres est incorrect, affiche un message d’erreur et renvoie False.
         if l != number_of_parameters + 1:
@@ -326,21 +353,21 @@ class Actions:
         return player.back()
 
     def inventory(game, list_of_words, number_of_parameters):
-        
+
         l = len(list_of_words)
         # Si le nombre de paramètres est incorrect, affiche un message d’erreur et renvoie False.
         if l != number_of_parameters + 1:
             command_word = list_of_words[0]
             print(MSG0.format(command_word=command_word))
             return False
-        
+
         # Afficher l’inventaire du joueur.
         player = game.player
         print(player.get_inventory())
         return True
 
     def look(game, list_of_words, number_of_parameters):
-        
+
         l = len(list_of_words)
         if l != number_of_parameters + 1:
             command_word = list_of_words[0]
@@ -371,7 +398,7 @@ class Actions:
         return True
 
     def speak(game, list_of_words, number_of_parameters):
-        
+
         l = len(list_of_words)
         # Si aucun paramètre n’est fourni ou si l’utilisation est incorrecte, demandez à réessayer
         if l < number_of_parameters + 1:
@@ -409,13 +436,13 @@ class Actions:
 
             # Premier dialogue (premier contact)
             if pnj.talk_count == 1:
-             
+
                 conversation_active = True
                 numero_de_reponse = "Que voulez-vous répondre ? Entrer le numéro correspondant \nou 'au revoir' pour quitter la conversation."
-                
+
                 message_index = 1  # Prochain message
                 additional_msgs = ["C'est génial, tu es musicien ?",
-                                   "Génial ! Le club musique est au parking en passant par les escaliers.", 
+                                   "Génial ! Le club musique est au parking en passant par les escaliers.",
                                    "Je vois. Cette année t'auras plein de temps pour apprendre à jouer\nd'un instrument de musique, mais ne néglige pas tes cours !!",
                                    "En voilà quelqu'un bien pressé ! Tu devrais aller au club trico ça va te calmer !!",
                                    "Oui bien sûr ! Le club musique est au parking en passant par les escaliers."]
@@ -468,8 +495,13 @@ class Actions:
                     # chemin où Jean propose d'emmener le joueur
                     print("Jean Bomber : Cherche bien et tu finiras par trouver. Tu t'appelles comment d'ailleurs ?")
                     print(f"je m'appelle {player.name}")
-                        
-                    print("\nJean Bomber : ça marche ! Moi c'est Jean Bomber ! Laisse moi t'y emmener. Bon, je t'explique. Pour rentrer dans la salle musique, c'est un peu spécial. Il faut que tu fonces dans la forte pour qu'elle s'ouvre correctement.  A toi de jouer !")
+
+                    print(
+                        "\nJean Bomber : ça marche ! Moi c'est Jean Bomber ! "
+                        "Laisse moi t'y emmener. Bon, je t'explique. Pour "
+                        "rentrer dans la salle musique, c'est un peu spécial. "
+                        "Il faut que tu fonces dans la forte pour qu'elle "
+                        "s'ouvre correctement.  A toi de jouer !")
                     # trouver la salle Marcel Dassault
                     target = None
                     for r in game.rooms:
@@ -498,7 +530,7 @@ class Actions:
                             print("Vous repartez péniblement.")
                     else:
                         print("Impossible de trouver la salle 'Marcel Dassault'.")
-                    
+
         elif 'au revoir' in low:
             print(f"\n{pnj.name} est partit.")
 
@@ -532,8 +564,8 @@ class Actions:
         return True
     #Prend un item
     def _take_simple(game, list_of_words):
-    
-        
+
+
         if len(list_of_words) < 2:
             print("\nOups.. réessaies encore !\n")
             return False
@@ -636,7 +668,7 @@ class Actions:
         return True
     #repose un item
     def _drop_simple(game, list_of_words):
-        
+
         if len(list_of_words) < 2:
             print("\nOups.. réessaies encore !\n")
             return False
@@ -663,13 +695,16 @@ class Actions:
 
     # Wrappers compatibles avec l’API existante (game, list_of_words, number_of_parameters)
     def take(game, list_of_words, number_of_parameters=None):
+        """Prend un objet dans la salle."""
         return Actions._take_simple(game, list_of_words)
 
     def drop(game, list_of_words, number_of_parameters=None):
+        """Dépose un objet de l'inventaire."""
         return Actions._drop_simple(game, list_of_words)
 
     @staticmethod
     def quests(game, list_of_words, number_of_parameters):
+        """Affiche toutes les quêtes."""
         # Si le nombre de paramètres est incorrect, affiche un message d’erreur et renvoie False.
         n = len(list_of_words)
         if n != number_of_parameters + 1:
@@ -682,6 +717,7 @@ class Actions:
         return True
     @staticmethod
     def quest(game, list_of_words, number_of_parameters):
+        """Affiche les détails d'une quête."""
         # Si le nombre de paramètres est incorrect, affiche un message d’erreur et renvoie False.
         n = len(list_of_words)
         if n < number_of_parameters + 1:
@@ -703,7 +739,8 @@ class Actions:
 
     @staticmethod
     def activate(game, list_of_words, number_of_parameters):
-            # Si le nombre de paramètres est incorrect, affiche un message d’erreur et renvoie False.
+        """Active une quête par son ID."""
+        # Si le nombre de paramètres est incorrect, affiche un message d’erreur et renvoie False.
         n = len(list_of_words)
         if n < number_of_parameters + 1:
             command_word = list_of_words[0]
@@ -726,6 +763,7 @@ class Actions:
 
     @staticmethod
     def je(game, list_of_words, number_of_parameters):
+        """Commande spéciale pour indiquer son prénom."""
         # validation minimale
         if len(list_of_words) < 3:
             print("\nUsage: je m'appelle <prenom>\n")
@@ -788,6 +826,7 @@ class Actions:
 
     @staticmethod
     def rewards(game, list_of_words, number_of_parameters):
+        """Affiche les récompenses obtenues."""
         # Si le nombre de paramètres est incorrect, affiche un message d’erreur et renvoie False.
         n = len(list_of_words)
         if n != number_of_parameters + 1:

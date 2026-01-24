@@ -74,7 +74,7 @@ try:
 finally:
     builtins.input = input_backup
 
-# Exit with non-zero if any error
+# Sortir avec un code non-zéro si erreur
 errors = [r for r in results if not r[1].startswith('ok')]
 if errors:
     print('\nErreurs détectées:', errors)

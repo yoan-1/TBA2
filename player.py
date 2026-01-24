@@ -1,7 +1,21 @@
-# Définit la classe du joueur.
+"""Module définissant la classe Player pour représenter le joueur."""
 from quest import QuestManager
 
-class Player():
+
+class Player:
+    """Représente le joueur avec son inventaire, quêtes et historique.
+
+    Attributes:
+        name: Nom du joueur
+        current_room: Salle actuelle où se trouve le joueur
+        history: Liste des salles visitées
+        inventory: Dictionnaire des objets possédés
+        quest_manager: Gestionnaire des quêtes
+        move_count: Nombre de déplacements effectués
+        rewards: Liste des récompenses obtenues
+        max_inventory_slots: Capacité maximale de l'inventaire
+        dead: État du joueur (mort/vivant)
+    """
 
     # Définit le constructeur.
     def __init__(self, name, inventory=None):
@@ -22,14 +36,15 @@ class Player():
         # état du joueur (mort/vivant)
         self.dead = False
 
-    def get_history(self):       
+    def get_history(self):
+        """Retourne l'historique des salles visitées (sauf la salle actuelle)."""
         # Si l'historique n'a qu'une seule pièce (la pièce actuelle), on ne liste rien.
         if len(self.history) <= 1:
             return "tu es toujours dans la pièce de départ!"
-    
+
         # Exclure la dernière pièce (qui est la pièce actuelle)
-        visited_rooms = self.history[:-1] 
-     
+        visited_rooms = self.history[:-1]
+
         history_string = "\nVous avez déjà visité les pièces suivantes:\n"
         for room in visited_rooms:
             # Nous utilisons la description de la pièce (ex: "un marécage sombre...")
@@ -37,10 +52,11 @@ class Player():
         return history_string
 
     def get_inventory(self):
+        """Retourne une description de l'inventaire du joueur."""
         # S'il n'y a rien dans l'inventaire, on le signale.
         if len(self.inventory) == 0:
             return "Votre inventaire est vide."
-        
+
         inventory_string = "\nVous disposez des items suivants:\n"
         for item in self.inventory.values():
             inventory_string += f"    - {item.name} : {item.description} ({item.weight} kg)\n"
@@ -59,7 +75,7 @@ class Player():
         # Si la pièce suivante est None, affiche un message d’erreur et renvoie False.
         if next_room is None:
             print("\nImpossible d'aller dans cette direction !\n")
-            return False    
+            return False
         # Si la salle ciblée est une instance de Room et verrouillée
         try:
             locked = getattr(next_room, 'locked', False)
@@ -87,12 +103,12 @@ class Player():
             else:
                 print("\nCette porte est fermée à clé.\n")
                 return False
-        
+
         # Réglez la pièce actuelle sur la pièce suivante.
         self.current_room = next_room
 
         self.history.append(self.current_room)
-        
+
         print(self.current_room.get_long_description())
 #
    #     history_output = self.get_history()
@@ -100,12 +116,12 @@ class Player():
    #         print(history_output)
 
         return True
-    
+
     def back(self):
         if len(self.history) <= 1:
             print("\nVous ne pouvez pas aller en arrière, vous êtes dans la première salle")
             return False
-    
+
         #retire la derniere salle de l'affichage
         self.history.pop()
 
@@ -126,7 +142,7 @@ class Player():
         history.append
 
 
-        
 
 
-        
+
+
