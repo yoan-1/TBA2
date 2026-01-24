@@ -32,11 +32,20 @@ class Game:
     def setup(self, player_name=None):
 
         # Configurer les commandes
-
-        help = Command("help", " : afficher cette aide", Actions.help, 0)
+        #help permet d'afficher toutes les commandes disponibles
+        help = Command(
+            "help", 
+            " : afficher cette aide", 
+            Actions.help, 0
+        )
         self.commands["help"] = help
-        quit = Command("quit", " : quitter le jeu", Actions.quit, 0)
+        #qui permet de quitter le jeu
+        quit = Command(
+            "quit", 
+            " : quitter le jeu", 
+            Actions.quit, 0)
         self.commands["quit"] = quit
+        #go permet de se déplacer dans une direction en choisissant la direction cardinale
         go = Command(
             "go",
             " <direction> : se déplacer dans une direction cardinale (N, E, S, O)",
@@ -44,25 +53,74 @@ class Game:
             1
         )
         self.commands["go"] = go
-        check = Command("check", " : afficher votre inventaire", Actions.inventory, 0)
+        #check permet d'afficher l'inventaire du joueur
+        check = Command(
+            "check", 
+            " : afficher votre inventaire",
+            Actions.inventory, 0
+        )
         self.commands["check"] = check
-        back = Command("back"," : Vous permet de revenir en arrière", Actions.back, 0)
+        #back permet de revenir en arrière dans 
+        #le cas ou le joueur souhaite vraiment revenir en arrière
+        #Cela permet que le joueur puisse revenir dans la pièce précédente 
+        # s'il se trompe par mégarde
+        back = Command(
+            "back",
+            " : Vous permet de revenir en arrière", 
+            Actions.back, 0
+        )
         self.commands["back"] = back
-        look = Command("look"," : regarder autour de soi", Actions.look, 0)
+        #look permet de regarder les objets présents dans la pièce dans laquelle le joueur se trouve
+        look = Command(
+            "look",
+            " : regarder autour de soi", 
+            Actions.look, 0
+        )
         self.commands["look"] = look
-        speak = Command("speak", " <nom_pnj> : parler à un PNJ", Actions.speak, 1)
+        #speak permet de s'adresser à un PNJ s'il y en a un dans la pièce
+        speak = Command(
+            "speak", 
+            " <nom_pnj> : parler à un PNJ", 
+            Actions.speak, 1
+        )
         self.commands["speak"] = speak
-        # commande `je m'appelle` retirée — gestion du nom se fait via dialogue interne
-        take = Command("take", " <item> : prendre un item présent dans la pièce", Actions.take, 1)
+        #take permet de prendre un objet dans la pièce où se trouve le joueur
+        take = Command(
+            "take",
+            " <item> : prendre un item dans la pièce",
+            Actions.take, 1
+        )
         self.commands["take"] = take
-        drop = Command("drop", " <item> : reposer un item depuis votre inventaire", Actions.drop, 1)
+        #drop permet de déposer un objet de l'inventaire du joueur dans la pièce où il se trouve
+        drop = Command(
+            "drop", 
+            " <item> : reposer un item depuis votre inventaire",
+            Actions.drop, 1
+        )
         self.commands["drop"] = drop
-        history = Command("history", " : afficher les pièces déjà visitées", Actions.history, 0)
+        #history permet d'afficher l'historique des pièces visitées par le joueur
+        history = Command(
+            "history", 
+            " : afficher les pièces déjà visitées",
+            Actions.history, 0
+        )
         self.commands["history"] = history
-        quests = Command("quests", " : afficher la liste des quêtes", Actions.quests, 0)
+        #quests permet d'afficher les quêtes disponibles
+        quests = Command(
+            "quests", 
+            " : afficher la liste des quêtes",
+            Actions.quests, 0
+        )
         self.commands["quests"] = quests
-        quest = Command("quest", " <titre> : afficher les détails d'une quête", Actions.quest, 1)
+        #quest permet d'afficher les détails d'une quête
+        quest = Command(
+            "quest", 
+            " <titre> : afficher les détails d'une quête", 
+            Actions.quest, 1
+        )
         self.commands["quest"] = quest
+        #Cette commande permet d'activer une quête, bien qu'il 
+        #ne soit normalement pas nécessaire de le faire manuellement lors du déroulé due jeu 
         activate = Command(
             "activate",
             " <num> : activer une quête (utiliser le numéro)",
@@ -71,59 +129,87 @@ class Game:
             hidden=False
         )
         self.commands["activate"] = activate
-        rewards = Command("rewards", " : afficher vos récompenses", Actions.rewards, 0)
+        #rewards permet d'afficher les récompenses obtenues par le joueur
+        rewards = Command(
+            "rewards", 
+            " : afficher vos récompenses", 
+            Actions.rewards, 0
+        )
         self.commands["rewards"] = rewards
-        stay = Command("stay", " : rester sur place (fait avancer le monde)", Actions.stay, 0)
+        #stay permet de rester sur place pendant que les PNJ se déplacent aléatoirement sur la map
+        stay = Command(
+            "stay", 
+            " : rester sur place (fait avancer le monde)"
+            , Actions.stay, 0
+        )
         self.commands["stay"] = stay
-
         # Configurer les salles
-
-
+        #Le jeu débute dans cette salle. La Salle_1 contient 
+        #les consignes de la course d'orientation qu'il faut
+        #récupérer pour débloquer les premières quêtes et pour pouvoir sortir de la salle 
         Salle_1 = Room(
             "Salle 1",
             "dans la Salle 1. La course d'orientation débute !\n\n"
             "Professeur : Pensez à récupérer les consignes !"
         )
+        Salle_1.image = 'salle1.png'
         self.rooms.append(Salle_1)
         Salle_3 = Room("Salle 3", "dans la Salle 3.")
+        Salle_3.image = 'salle3.png'
         self.rooms.append(Salle_3)
+        #Le couloir 1 permet de relier le jardin, la salle 2 (verrouillée au départ), 
+        #les escaliers menant au parking et la Rue
         Couloir_1 = Room(
             "Couloir 1",
             "dans le Couloir 1. Vous voyez des portes tout autour de vous."
         )
+        Couloir_1.image = 'couloir1.png'
         self.rooms.append(Couloir_1)
         # Salle 2 existe mais est initialement verrouillée
         Salle_2 = Room("Salle 2", "dans la Salle 2. La porte est verrouillée.")
         Salle_2.locked = True
+        Salle_2.image = 'salle2.png'
         self.rooms.append(Salle_2)
-
+        #Le couloir 2 permet de relier la Salle 3, la Rue, et les escaliers menant au parking et la Rue
         Couloir_2 = Room(
             "couloir 2",
             "dans le Couloir 2. Vous voyez des portes tout autour de vous."
         )
+        Couloir_2.image = 'couloir2.png'
         self.rooms.append(Couloir_2)
+        #Le jardin de l'ESIEE !!
         jardin = Room("Jardin", "dans le jardin de l'ESIEE.")
+        jardin.image = 'jardin.png'
         self.rooms.append(jardin)
         Rue = Room(
             "Rue",
             "dans la rue de l'ESIEE. Vous voyez une grande allée "
             "et pleins d'endroits où aller"
         )
+        Rue.image = 'rue.png'
         self.rooms.append(Rue)
+        #La cafetaria ou se trouve jean bomber. Ce PNJ permet d'obtenir une carte qui explique 
+        #ou se trouve le club musique
         Cafeteria = Room("Cafétéria", "dans la cafétéria.")
+        Cafeteria.image = 'cafeteria.png'
         self.rooms.append(Cafeteria)
         Club_musique = Room(
             "Club musique",
             "dans le club de musique. Une ambiance étrange survient..."
         )
+        Club_musique.image = 'club_musique.png'
         self.rooms.append(Club_musique)
         Marcel = Room("Marcel Dassault", "Vous êtes dans la salle Marcel Dassault.")
+        Marcel.image = 'marcel.png'
         self.rooms.append(Marcel)
         Escaliers1= Room("Escalier 1", "dans l'escalier 1.")
+        Escaliers1.image = 'escalier1.png'
         self.rooms.append(Escaliers1)
         Escaliers2= Room("Escalier 2", "dans l'escalier 2.")
+        Escaliers2.image = 'escalier2.png'
         self.rooms.append(Escaliers2)
         Parking= Room("Parking", "sur le parking. Vous voyez des voitures garées un peu partout.")
+        Parking.image = 'parking.png'
         self.rooms.append(Parking)
         # Le joueur a pu laisser quelque chose sur le parking (bouclier)
         Parking.inventory['bouclier'] = Item(
@@ -135,6 +221,7 @@ class Game:
             "Parking 2",
             "sur le parking. Vous voyez des voitures garées un peu partout."
         )
+        Parking_2.image = 'parking2.png'
         self.rooms.append(Parking_2)
         # Le sac contenant le monster_trunk
         # (accessible si on a déjà visité le Club musique)
@@ -200,7 +287,7 @@ class Game:
         Parking_2.exits={"N" : Escaliers1, "O" : Escaliers2}
         Marcel.exits={"N": Rue, "S": Rue}
 
-        # ############ SETUP DES PNJ/MONSTRES ############
+        ########### SETUP DES PNJ/MONSTRES ############
 
         # NOTE : current_room doit être défini plus tard lors du placement
         # Le Demogorgon sera créé et placé dans la Rue quand le joueur arrive au Club musique
@@ -217,7 +304,6 @@ class Game:
             None,
             ["Salut !"]
         )
-
         # PLACEMENT DES PNJ
         # Le Démogorgon ne sera placé que quand le joueur entre dans le Club musique
         # Pour l'instant, on stocke juste la référence dans le jeu
@@ -226,9 +312,7 @@ class Game:
         Cafeteria.characters[jean_bomber.name.lower()] = jean_bomber
         jean_bomber.current_room = Cafeteria
 
-
         # Configurer le lecteur et démarrer la salle de départ
-
         if player_name is None:
             player_name = input("\nEntre ton pseudo: ")
         self.player = Player(player_name, {})
@@ -272,7 +356,7 @@ class Game:
             reward=map_reward
         )
 
-
+        # 4) Quête de déplacement : aller dehors
         aller_dehors = Quest(
             title="Aller dehors",
             description="Sortez dehors.",
@@ -280,6 +364,7 @@ class Game:
             reward="Sortie réussie"
             )
 
+        # 5) Quête de déplacement : se rendre dans la Rue
         se_rendre_rue = Quest(
             title="Se rendre dans la Rue",
             description="Allez dans la Rue.",
