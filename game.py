@@ -227,7 +227,7 @@ class Game:
         # La activation de la quête 'Parler à jean bomber' se fera explicitement
         # lors de la commande `look` en Cafétéria (pour éviter activation à l'entrée).
 
-    # Play the game
+    # Jouer au jeu
     def play(self):
         self.setup()
         self.print_welcome()
@@ -303,7 +303,7 @@ class Game:
 
    
 ##############################
-# Tkinter GUI Implementation #
+    # Créer un objet de jeu et jouer le jeu
 ##############################
 
 class _StdoutRedirector:
@@ -703,10 +703,15 @@ class GameGUI(tk.Tk):
 
 
     def _send_command(self, command):
-        if self.game.finished:
+        # Permettre uniquement 'quit' si le jeu est terminé
+        if self.game.finished and command.strip().lower() != 'quit':
+            print("Le jeu est terminé. Tapez 'quit' pour quitter.\n")
             return
         # Echo the command in output area
         print(f"> {command}\n")
+        
+        # Stocker la commande pour vérification ultérieure
+        self._last_command = command.strip().lower()
         
         # Process command in a separate thread to avoid blocking the GUI
         import threading
@@ -722,9 +727,8 @@ class GameGUI(tk.Tk):
         """Update UI after command execution."""
         self._update_room_image()
         self._update_info_panel()
-        if self.game.finished:
-            # Disable further input and schedule close (brief delay to show farewell)
-            self.entry.configure(state="disabled")
+        # Fermer la fenêtre uniquement si la commande était 'quit'
+        if self.game.finished and getattr(self, '_last_command', '') == 'quit':
             self.after(600, self._on_close)
 
     def _handle_take(self):

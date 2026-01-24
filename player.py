@@ -1,19 +1,19 @@
-# Define the Player class.
+# Définit la classe du joueur.
 from quest import QuestManager
 
 class Player():
 
-    # Define the constructor.
+    # Définit le constructeur.
     def __init__(self, name, inventory=None):
         self.name = name
         self.current_room = None
         self.history = []
-        # Inventory: dictionnaire item_name -> Item instance
+        # Inventaire : dictionnaire item_name -> Item instance
         self.inventory = {} if inventory is None else inventory
         self.quest_manager = QuestManager()
         self.move_count = 0
         self.rewards = []
-        # conversation state for commands like 'je m'appelle'
+        # état de la conversation pour les commandes comme 'je m’appelle'
         self.conversation_with = None
         self.waiting_for_name = False
         self.custom_name = None
@@ -51,12 +51,12 @@ class Player():
 
 
 
-    # Define the move method.
+    # Définissez la méthode de déplacement.
     def move(self, direction):
-        # Get the next room from the exits dictionary of the current room.
+        # Obtenez la pièce suivante du dictionnaire des sorties de la pièce actuelle.
         next_room = self.current_room.exits.get(direction)
 
-        # If the next room is None, print an error message and return False.
+        # Si la pièce suivante est None, affiche un message d’erreur et renvoie False.
         if next_room is None:
             print("\nImpossible d'aller dans cette direction !\n")
             return False    
@@ -88,7 +88,7 @@ class Player():
                 print("\nCette porte est fermée à clé.\n")
                 return False
         
-        # Set the current room to the next room.
+        # Réglez la pièce actuelle sur la pièce suivante.
         self.current_room = next_room
 
         self.history.append(self.current_room)
