@@ -13,7 +13,6 @@ class Item:
     def __str__(self):
         return f"{self.name} : {self.description} ({self.weight} kg)"
 
-
 if __name__ == "__main__":
     sword = Item("sword", "une épée au fil tranchant comme un rasoir", 2)
     print(sword)
