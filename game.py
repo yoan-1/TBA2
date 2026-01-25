@@ -6,6 +6,7 @@ import tkinter as tk
 from tkinter import simpledialog
 from tkinter import ttk
 from pathlib import Path
+from PIL import Image, ImageTk
 
 from room import Room
 from player import Player
@@ -168,7 +169,7 @@ class Game:
         # Salle 2 existe mais est initialement verrouillée
         Salle_2 = Room("Salle 2", "dans la Salle 2. La porte est verrouillée.")
         Salle_2.locked = True
-        Salle_2.image = 'salle2.png'
+        Salle_2.image = 'salle2.png.jpg'
         self.rooms.append(Salle_2)
         #Le couloir 2 permet de relier la Salle 3, la Rue, et les escaliers menant au parking et la Rue
         Couloir_2 = Room(
@@ -191,7 +192,7 @@ class Game:
         #La cafetaria ou se trouve jean bomber. Ce PNJ permet d'obtenir une carte qui explique 
         #ou se trouve le club musique
         Cafeteria = Room("Cafétéria", "dans la cafétéria.")
-        Cafeteria.image = 'cafeteria.png'
+        Cafeteria.image = 'cafétaria.jpg'
         self.rooms.append(Cafeteria)
         Club_musique = Room(
             "Club musique",
@@ -209,7 +210,7 @@ class Game:
         Escaliers2.image = 'escalier2.png'
         self.rooms.append(Escaliers2)
         Parking= Room("Parking", "sur le parking. Vous voyez des voitures garées un peu partout.")
-        Parking.image = 'parking.png'
+        Parking.image = 'parking.jpg'
         self.rooms.append(Parking)
         # Le joueur a pu laisser quelque chose sur le parking (bouclier)
         Parking.inventory['bouclier'] = Item(
@@ -221,9 +222,9 @@ class Game:
             "Parking 2",
             "sur le parking. Vous voyez des voitures garées un peu partout."
         )
-        Parking_2.image = 'parking2.png'
+        Parking_2.image = 'parking.jpg'
         self.rooms.append(Parking_2)
-        # Le sac contenant le monster_trunk
+        # Le sac contenant le monster_tracker
         # (accessible si on a déjà visité le Club musique)
         Parking_2.inventory['sac'] = Item(
             'sac',
@@ -245,12 +246,6 @@ class Game:
         Salle_1.inventory['consignes'].description = (
             "Une feuille indiquant les pièces à découvrir : "
             "Rue, Cafétaria, Club musique"
-        )
-        Salle_3.inventory['survêt'] = Item(
-            'survêt',
-            'On voit le survêtement rouge de Louis tahhh '
-            'le tripaloski et les années 80',
-            0.2
         )
         # Dans la Salle 2 se trouve une carte brillante montrant une croix indiquant
         # un emplacement dans le Jardin (la croix marque l'endroit où se trouve l'épée).
@@ -504,38 +499,38 @@ class _InputRedirector:
         self.input_result = None
 
     def __call__(self, prompt=""):
-        """Wait for user input via the entry field."""
+        """Attendre l'entrée de l'utilisateur via le champ d'entrée."""
         if prompt:
-            # Display the prompt in the output
+            # Afficher l'invite de commande dans la sortie
             print(prompt, end="")
 
-        # Set flag that we're waiting for input
+        # Définir le drapeau d'attente d'entrée
         self.waiting_for_input = True
         self.input_result = None
 
-        # Wait for the user to submit input via the entry field
+        # Attendre que l'utilisateur soumette une entrée via le champ d'entrée
         self.gui.wait_variable(self.gui.input_ready_var)
 
-        # Get the result
+        # Obtenir le résultat
         result = self.input_result if self.input_result is not None else ""
 
-        # Reset flags
+        # Réinitialiser les drapeaux
         self.waiting_for_input = False
         self.input_result = None
 
-        # Echo the response
+        # Afficher la réponse
         print(result)
 
         return result
 
 
 class GameGUI(tk.Tk):
-    """Tkinter GUI for the text-based adventure game.
+    """Interface graphique Tkinter pour le jeu d'aventure textuel.
 
-    Layout layers:
-    L3 (top): Split into left image area (600x400) and right buttons.
-    L2 (middle): Scrolling terminal output.
-    L1 (bottom): Command entry field.
+    Couches de mise en page:
+    L3 (haut): Divisée en zone d'image à gauche (600x400) et boutons à droite.
+    L2 (milieu): Sortie de terminal avec défilement.
+    L1 (bas): Champ d'entrée de commande.
     """
 
     IMAGE_WIDTH = 600
@@ -834,8 +829,8 @@ class GameGUI(tk.Tk):
             image_path = assets_dir / 'scene.png'
 
         try:
-            # Load new image
-            self._image_ref = tk.PhotoImage(file=str(image_path))
+            # Load new image (PNG or JPG)
+            self._load_image_from_file(image_path)
             # Clear canvas and redraw image
             self.canvas.delete("all")
             self.canvas.create_image(
@@ -853,6 +848,22 @@ class GameGUI(tk.Tk):
                 fill="white",
                 font=("Helvetica", 18)
             )
+
+    def _load_image_from_file(self, image_path):
+        """Load an image from file, supporting PNG and JPG formats using PIL."""
+        image_path = Path(image_path)
+        
+        # Try with PIL for both PNG and JPG support
+        if image_path.suffix.lower() in ['.png', '.jpg', '.jpeg']:
+            pil_image = Image.open(image_path)
+            # Resize if necessary to fit canvas
+            pil_image.thumbnail((self.IMAGE_WIDTH, self.IMAGE_HEIGHT), Image.Resampling.LANCZOS)
+            # Keep reference to PIL image to prevent garbage collection
+            self._pil_image = pil_image
+            self._image_ref = ImageTk.PhotoImage(pil_image)
+        else:
+            # Fallback to tk.PhotoImage for other formats
+            self._image_ref = tk.PhotoImage(file=str(image_path))
 
 
     # -------- Event handlers --------
@@ -900,6 +911,8 @@ class GameGUI(tk.Tk):
         """Update UI after command execution."""
         self._update_room_image()
         self._update_info_panel()
+        # Force le refresh immédiat et complet de l'affichage
+        self.update()
         # Fermer la fenêtre uniquement si la commande était 'quit'
         if self.game.finished and getattr(self, '_last_command', '') == 'quit':
             self.after(600, self._on_close)

@@ -131,10 +131,10 @@ class Actions:
             # Vérifier les objectifs de type compteur (ex: Se déplacer X fois)
             player.quest_manager.check_counter_objectives(
                 "Se déplacer", player.move_count)
-            # Si le joueur possède un 'monster_trunk', afficher la position actuelle du monstre
+            # Si le joueur possède un 'monster_tracker', afficher la position actuelle du monstre
             try:
                 inv = getattr(player, 'inventory', {}) or {}
-                if 'monster_trunk' in inv:
+                if 'monster_tracker' in inv:
                     dem_pos = None
                     for r in getattr(game, 'rooms', []) or []:
                         for cname in getattr(r, 'characters', {}).keys():
@@ -148,7 +148,7 @@ class Actions:
                         if dem_pos:
                             break
                     if dem_pos:
-                        print(f"\n[monster_trunk] Le monstre est actuellement à : {dem_pos}")
+                        print(f"\n[monster_tracker] Le monstre est actuellement à : {dem_pos}")
             except Exception:
                 pass
             # Si le monstre est dans la même pièce, proposer une confrontation
@@ -235,10 +235,10 @@ class Actions:
             pass
 
         player = game.player
-        # Si le joueur a un monster_trunk, révélez la position du monstre après le mouvement
+        # Si le joueur a un monster_tracker, révélez la position du monstre après le mouvement
         try:
             inv = getattr(player, 'inventory', {}) or {}
-            if 'monster_trunk' in inv:
+            if 'monster_tracker' in inv:
                 dem_pos = None
                 for r in getattr(game, 'rooms', []) or []:
                     for cname in getattr(r, 'characters', {}).keys():
@@ -252,7 +252,7 @@ class Actions:
                     if dem_pos:
                         break
                 if dem_pos:
-                    print(f"\n[monster_trunk] Le monstre est actuellement à : {dem_pos}")
+                    print(f"\n[monster_tracker] Le monstre est actuellement à : {dem_pos}")
         except Exception:
             pass
 
@@ -582,7 +582,7 @@ class Actions:
             print(f"\nIl n'y a pas d'item nommé '{item_name}' ici.\n")
             return False
 
-        # Logique spéciale : 'sac' contient 'monster_trunk' mais ne peut être pris que
+        # Logique spéciale : 'sac' contient 'monster_tracker' mais ne peut être pris que
         # si le joueur a déjà visité le 'Club musique'.
         if item_name == 'sac':
             visited_club = False
@@ -635,17 +635,17 @@ class Actions:
             player.inventory = {}
         player.inventory[item_name] = item
         print(f"\nVous avez pris l'item '{item_name}'.\n")
-        # Si nous venons de prendre le sac, révélez le monster_trunk à l’intérieur
+        # Si nous venons de prendre le sac, révélez le monster_tracker à l’intérieur
         if item_name == 'sac':
             try:
-                if 'monster_trunk' not in player.inventory:
-                    mt = Item('monster_trunk', "un objet étrange en cuir qui semble permettre de localiser un monstre", 2.0)
-                    player.inventory['monster_trunk'] = mt
-                    print("En fouillant le sac vous trouvez un objet appelé 'monster_trunk'.\n")
-                    # Message indiquant l'objectif principal et le fonctionnement du monster_trunk
+                if 'monster_tracker' not in player.inventory:
+                    mt = Item('monster_tracker', "un objet étrange en cuir qui semble permettre de localiser un monstre", 2.0)
+                    player.inventory['monster_tracker'] = mt
+                    print("En fouillant le sac vous trouvez un objet appelé 'monster_tracker'.\n")
+                    # Message indiquant l'objectif principal et le fonctionnement du monster_tracker
                     try:
                         print("\nOBJECTIF: Tuer le monstre qui rôde.\n"
-                              "Votre 'monster_trunk' vous permettra de localiser le monstre en temps réel.")
+                              "Votre 'monster_tracker' vous permettra de localiser le monstre en temps réel.")
                     except Exception:
                         pass
             except Exception:

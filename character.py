@@ -37,7 +37,7 @@ class Character:
     def move(self, game=None):
         """Déplace le personnage vers une salle aléatoire ou le fait rester."""
         # Déterminer s'il faut afficher le débogage pour ce personnage
-        # (Demogorgon uniquement après que le joueur a 'monster_trunk')
+        # (Demogorgon uniquement après que le joueur a 'monster_tracker')
         try:
             norm_name = ''.join(
                 c for c in unicodedata.normalize('NFD', self.name).lower()
@@ -51,7 +51,7 @@ class Character:
             try:
                 player = getattr(game, 'player', None)
                 inv = getattr(player, 'inventory', {}) if player else {}
-                show_debug = 'monster_trunk' in inv
+                show_debug = 'monster_tracker' in inv
             except (AttributeError, TypeError):
                 show_debug = False
 
