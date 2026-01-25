@@ -539,48 +539,48 @@ class GameGUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("TBA")
-        self.geometry("900x700")  # Provide enough space
+        self.geometry("900x700")  # Fournir suffisamment d'espace
         self.minsize(900, 650)
 
-        # Underlying game logic instance
+        # Instance de la logique du jeu
         self.game = Game()
 
-        # Ask player name via dialog (fallback to 'Joueur')
+        # Demander le nom du joueur via une boîte de dialogue (défaut 'Joueur')
         name = simpledialog.askstring("Nom", "Entrez votre nom:", parent=self)
         if not name:
             name = "Joueur"
-        self.game.setup(player_name=name)  # Pass name to avoid double prompt
+        self.game.setup(player_name=name)  # Passer le nom pour éviter un double invite
 
-        # Variable to signal when input is ready
+        # Variable pour signaler quand l'entrée est prête
         self.input_ready_var = tk.IntVar()
         self.input_redirector = None
 
-        # Build UI layers
+        # Construire les couches UI
         self._build_layout()
 
-        # Redirect stdout so game prints appear in terminal output area
+        # Rediriger stdout pour que les affichages du jeu apparaissent dans la zone de sortie
         self.original_stdout = sys.stdout
         self.original_input = __builtins__.input
         sys.stdout = _StdoutRedirector(self.text_output)
         self.input_redirector = _InputRedirector(self)
         __builtins__.input = self.input_redirector
 
-        # Print welcome text in GUI
+        # Afficher le texte de bienvenue dans l'interface
         self.game.print_welcome()
 
-        # Load initial room image
+        # Charger l'image de la salle initiale
         self._update_room_image()
 
-        # Handle window close
+        # Gérer la fermeture de la fenêtre
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
 
-    # -------- Layout construction --------
+    # -------- Construction de la mise en page --------
     def _build_layout(self):
-        # Configure root grid: 3 rows (L3, L2, L1)
-        self.grid_rowconfigure(0, weight=0)  # Image/buttons fixed height
-        self.grid_rowconfigure(1, weight=1)  # Terminal output expands
-        self.grid_rowconfigure(2, weight=0)  # Entry fixed
+        # Configurer la grille racine : 3 lignes (L3, L2, L1)
+        self.grid_rowconfigure(0, weight=0)  # Image/boutons hauteur fixe
+        self.grid_rowconfigure(1, weight=1)  # Sortie terminal s'étend
+        self.grid_rowconfigure(2, weight=0)  # Entrée fixe
         self.grid_columnconfigure(0, weight=1)
 
         # Ajout d'un panneau latéral à droite pour infos joueur
@@ -607,27 +607,27 @@ class GameGUI(tk.Tk):
         # L3L Image area (left)
         image_frame = ttk.Frame(top_frame, width=self.IMAGE_WIDTH, height=self.IMAGE_HEIGHT)
         image_frame.grid(row=0, column=0, sticky="nw", padx=(0,6))
-        image_frame.grid_propagate(False)  # Keep requested size
+        image_frame.grid_propagate(False)  # Conserver la taille demandée
         self.canvas = tk.Canvas(image_frame,
                                 width=self.IMAGE_WIDTH,
                                 height=self.IMAGE_HEIGHT,
                                 bg="#222")
         self.canvas.pack(fill="both", expand=True)
 
-        # Initialize image reference (will be loaded by _update_room_image)
-        self._image_ref = None  # Keep reference to prevent garbage collection
-        # Initial image will be loaded after welcome message
+        # Initialiser la référence d'image (sera chargée par _update_room_image)
+        self._image_ref = None  # Conserver la référence pour éviter la collecte des ordures
+        # L'image initiale sera chargée après le message de bienvenue
 
-        # L3R Buttons area (right)
+        # L3R Zone des boutons (droite)
         buttons_frame = ttk.Frame(top_frame)
         buttons_frame.grid(row=0, column=1, sticky="ne")
         for i in range(10):
             buttons_frame.grid_rowconfigure(i, weight=0)
         buttons_frame.grid_columnconfigure(0, weight=1)
 
-        # Load button images (keep references to prevent garbage collection)
+        # Charger les images des boutons (conserver les références pour éviter la collecte des ordures)
         assets_dir = Path(__file__).parent / 'assets'
-        # Load pre-resized 50x50 PNG images for better quality
+        # Charger les images PNG pré-redimensionnées 50x50 pour une meilleure qualité
         self._btn_help = tk.PhotoImage(file=str(assets_dir / 'help-50.png'))
         self._btn_up = tk.PhotoImage(file=str(assets_dir / 'up-arrow-50.png'))
         self._btn_down = tk.PhotoImage(file=str(assets_dir / 'down-arrow-50.png'))
@@ -635,12 +635,12 @@ class GameGUI(tk.Tk):
         self._btn_right = tk.PhotoImage(file=str(assets_dir / 'right-arrow-50.png'))
         self._btn_quit = tk.PhotoImage(file=str(assets_dir / 'quit-50.png'))
 
-        # Command buttons
+        # Boutons de commandes
         tk.Button(buttons_frame,
                   image=self._btn_help,
                   command=lambda: self._send_command("help"),
                   bd=0).grid(row=0, column=0, sticky="ew", pady=2)
-        # Movement buttons (N,E,S,O)
+        # Boutons de déplacement (N,E,S,O)
         move_frame = ttk.LabelFrame(buttons_frame, text="Déplacements")
         move_frame.grid(row=1, column=0, sticky="ew", pady=4)
         tk.Button(move_frame,
@@ -660,7 +660,7 @@ class GameGUI(tk.Tk):
                   command=lambda: self._send_command("go S"),
                   bd=0).grid(row=2, column=0, columnspan=2)
 
-        # Actions buttons (Take/Drop)
+        # Boutons d'actions (Prendre/Déposer)
         actions_frame = ttk.LabelFrame(buttons_frame, text="Actions")
         actions_frame.grid(row=3, column=0, sticky="ew", pady=4)
         actions_frame.grid_columnconfigure(0, weight=1)
@@ -684,7 +684,7 @@ class GameGUI(tk.Tk):
                    text="🔙 Back",
                    command=lambda: self._send_command("back")).grid(row=2, column=1, sticky="ew", padx=2, pady=2)
 
-        # Info buttons
+        # Boutons d'informations
         info_frame = ttk.LabelFrame(buttons_frame, text="Informations")
         info_frame.grid(row=5, column=0, sticky="ew", pady=4)
         info_frame.grid_columnconfigure(0, weight=1)
@@ -708,13 +708,13 @@ class GameGUI(tk.Tk):
                    text="✅ Activate",
                    command=self._handle_activate).grid(row=2, column=1, sticky="ew", padx=2, pady=2)
 
-        # Quit button
+        # Bouton Quitter
         tk.Button(buttons_frame,
                   image=self._btn_quit,
                   command=lambda: self._send_command("quit"),
                   bd=0).grid(row=6, column=0, sticky="ew", pady=(8,2))
 
-        # L2 Terminal output area (Text + Scrollbar)
+        # L2 Zone de sortie terminal (Texte + Barre de défilement)
         output_frame = ttk.Frame(main_frame)
         output_frame.grid(row=1, column=0, sticky="nsew", padx=6, pady=3)
         output_frame.grid_rowconfigure(0, weight=1)
@@ -730,7 +730,7 @@ class GameGUI(tk.Tk):
         self.text_output.grid(row=0, column=0, sticky="nsew")
         scrollbar.grid(row=0, column=1, sticky="ns")
 
-        # L1 Entry area
+        # L1 Zone d'entrée
         entry_frame = ttk.Frame(main_frame)
         entry_frame.grid(row=2, column=0, sticky="ew", padx=6, pady=(3,6))
         entry_frame.grid_columnconfigure(0, weight=1)
@@ -813,7 +813,7 @@ class GameGUI(tk.Tk):
                 self.quest_list.insert(tk.END, q.title)
 
 
-    # -------- Image update --------
+    # -------- Mise à jour de l'image --------
     def _update_room_image(self):
         """Update the canvas image based on the current room."""
         if not self.game.player or not self.game.player.current_room:
@@ -822,16 +822,16 @@ class GameGUI(tk.Tk):
         room = self.game.player.current_room
         assets_dir = Path(__file__).parent / 'assets'
 
-        # Use room-specific image if available, otherwise fallback
+        # Utiliser l'image spécifique à la salle si disponible, sinon utiliser la valeur par défaut
         if room.image:
             image_path = assets_dir / room.image
         else:
             image_path = assets_dir / 'scene.png'
 
         try:
-            # Load new image (PNG or JPG)
+            # Charger la nouvelle image (PNG ou JPG)
             self._load_image_from_file(image_path)
-            # Clear canvas and redraw image
+            # Effacer le canevas et redessiner l'image
             self.canvas.delete("all")
             self.canvas.create_image(
                 self.IMAGE_WIDTH/2,
@@ -839,7 +839,7 @@ class GameGUI(tk.Tk):
                 image=self._image_ref
             )
         except (FileNotFoundError, tk.TclError):
-            # Fallback to text if image not found or cannot be loaded
+            # Revenir au texte si l'image n'est pas trouvée ou ne peut pas être chargée
             self.canvas.delete("all")
             self.canvas.create_text(
                 self.IMAGE_WIDTH/2,
@@ -853,20 +853,20 @@ class GameGUI(tk.Tk):
         """Load an image from file, supporting PNG and JPG formats using PIL."""
         image_path = Path(image_path)
         
-        # Try with PIL for both PNG and JPG support
+        # Essayer avec PIL pour la prise en charge du PNG et du JPG
         if image_path.suffix.lower() in ['.png', '.jpg', '.jpeg']:
             pil_image = Image.open(image_path)
-            # Resize if necessary to fit canvas
+            # Redimensionner si nécessaire pour s'adapter au canevas
             pil_image.thumbnail((self.IMAGE_WIDTH, self.IMAGE_HEIGHT), Image.Resampling.LANCZOS)
-            # Keep reference to PIL image to prevent garbage collection
+            # Conserver la référence à l'image PIL pour éviter la collecte des ordures
             self._pil_image = pil_image
             self._image_ref = ImageTk.PhotoImage(pil_image)
         else:
-            # Fallback to tk.PhotoImage for other formats
+            # Revenir à tk.PhotoImage pour les autres formats
             self._image_ref = tk.PhotoImage(file=str(image_path))
 
 
-    # -------- Event handlers --------
+    # -------- Gestionnaires d'événements --------
     def _on_enter(self, _event=None):
         """Handle Enter key press in the entry field."""
         value = self.entry_var.get().strip()
@@ -875,14 +875,14 @@ class GameGUI(tk.Tk):
         if not value:
             return
 
-        # Check if we're waiting for input (from a prompt)
+        # Vérifier si nous attendons une entrée (d'une invite)
         if self.input_redirector and self.input_redirector.waiting_for_input:
-            # Store the input result
+            # Stocker le résultat de l'entrée
             self.input_redirector.input_result = value
-            # Signal that input is ready
+            # Signaler que l'entrée est prête
             self.input_ready_var.set(1)
         else:
-            # Normal command processing
+            # Traitement normal de la commande
             self._send_command(value)
 
 
@@ -891,17 +891,17 @@ class GameGUI(tk.Tk):
         if self.game.finished and command.strip().lower() != 'quit':
             print("Le jeu est terminé. Tapez 'quit' pour quitter.\n")
             return
-        # Echo the command in output area
+        # Afficher la commande dans la zone de sortie
         print(f"> {command}\n")
 
         # Stocker la commande pour vérification ultérieure
         self._last_command = command.strip().lower()
 
-        # Process command in a separate thread to avoid blocking the GUI
+        # Traiter la commande dans un thread séparé pour éviter de bloquer l'interface
         import threading
         def process():
             self.game.process_command(command)
-            # Schedule UI update on main thread
+            # Planifier la mise à jour de l'interface sur le thread principal
             self.after(0, self._update_after_command)
 
         thread = threading.Thread(target=process, daemon=True)
@@ -911,7 +911,7 @@ class GameGUI(tk.Tk):
         """Update UI after command execution."""
         self._update_room_image()
         self._update_info_panel()
-        # Force le refresh immédiat et complet de l'affichage
+        # Forcer le rafraîchissement immédiat et complet de l'affichage
         self.update()
         # Fermer la fenêtre uniquement si la commande était 'quit'
         if self.game.finished and getattr(self, '_last_command', '') == 'quit':
@@ -947,7 +947,7 @@ class GameGUI(tk.Tk):
         listbox.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=listbox.yview)
 
-        # Populate with room items
+        # Remplir avec les objets de la salle
         items = list(room.inventory.keys())
         for item_name in items:
             item = room.inventory[item_name]
@@ -1003,7 +1003,7 @@ class GameGUI(tk.Tk):
         listbox.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=listbox.yview)
 
-        # Populate with player items
+        # Remplir avec les objets du joueur
         items = list(player.inventory.keys())
         for item_name in items:
             item = player.inventory[item_name]
@@ -1039,7 +1039,7 @@ class GameGUI(tk.Tk):
             print("\nIl n'y a personne ici avec qui parler.\n")
             return
 
-        # Create a dialog window for NPC selection
+        # Créer une fenêtre de dialogue pour la sélection de PNJ
         dialog = tk.Toplevel(self)
         dialog.title("Parler à un PNJ")
         dialog.geometry("400x250")
@@ -1059,7 +1059,7 @@ class GameGUI(tk.Tk):
         listbox.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=listbox.yview)
 
-        # Populate with NPCs
+        # Remplir avec les PNJ
         npcs = list(room.characters.values())
         for npc in npcs:
             listbox.insert(tk.END, npc.name)
@@ -1088,7 +1088,7 @@ class GameGUI(tk.Tk):
         if self.game.finished:
             return
 
-        # Ask for quest title
+        # Demander le titre de la quête
         quest_title = simpledialog.askstring(
             "Détails de quête",
             "Entrez le titre de la quête :",
@@ -1103,7 +1103,7 @@ class GameGUI(tk.Tk):
         if self.game.finished:
             return
 
-        # Ask for quest number
+        # Demander le numéro de la quête
         quest_num = simpledialog.askstring(
             "Activer une quête",
             "Entrez le numéro de la quête à activer :",
@@ -1115,7 +1115,7 @@ class GameGUI(tk.Tk):
 
 
     def _on_close(self):
-        # Restore stdout, input and destroy window
+        # Restaurer stdout, input et détruire la fenêtre
         sys.stdout = self.original_stdout
         __builtins__.input = self.original_input
         self.destroy()
@@ -1136,7 +1136,7 @@ def main():
         app = GameGUI()
         app.mainloop()
     except tk.TclError as e:
-        # Fallback to CLI if GUI fails (e.g., no DISPLAY, Tkinter not available)
+        # Revenir à la CLI si l'interface graphique échoue (par exemple, pas de DISPLAY, Tkinter non disponible)
         print(f"GUI indisponible ({e}). Passage en mode console.")
         Game().play()
 
