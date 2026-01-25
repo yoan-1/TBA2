@@ -140,9 +140,3 @@ class Player:
     def history(self, history):
         history = []
         history.append
-
-
-
-
-
-
