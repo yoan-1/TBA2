@@ -906,6 +906,11 @@ class GameGUI(tk.Tk):
 
         thread = threading.Thread(target=process, daemon=True)
         thread.start()
+        
+        # Actualiser l'image immédiatement pour les déplacements (go, back)
+        cmd_word = command.strip().split()[0].lower() if command.strip() else ""
+        if cmd_word in ('go', 'back'):
+            self.after(50, self._update_room_image)
 
     def _update_after_command(self):
         """Update UI after command execution."""
