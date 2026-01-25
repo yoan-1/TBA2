@@ -119,12 +119,14 @@ class Actions:
                         game._pnjs_moved_this_turn.add(id(demogorgon))
             except Exception:
                 pass
-
+            
             # Si c'est la première découverte de la salle, activer les quêtes liées
-            if not was_visited:
-                room_name_val = player.current_room.name
-            player.quest_manager.activate_quests_for_room(
-                room_name_val)
+            # Assurer une valeur pour l'activation des quêtes
+            room_name_val = player.current_room.name
+            if was_visited:
+                # Si déjà visitée, on garde le nom actuel pour éviter une variable non initialisée
+                pass
+            player.quest_manager.activate_quests_for_room(room_name_val)
 
             # Vérifier les objectifs liés aux pièces visitées (pour les quêtes actives)
             player.quest_manager.check_room_objectives(player.current_room.name)
@@ -147,6 +149,7 @@ class Actions:
                                 break
                         if dem_pos:
                             break
+                    # Afficher la position à chaque déplacement si connue
                     if dem_pos:
                         print(f"\n[monster_tracker] Le monstre est actuellement à : {dem_pos}")
             except Exception:
@@ -648,6 +651,25 @@ class Actions:
                               "Votre 'monster_tracker' vous permettra de localiser le monstre en temps réel.")
                     except Exception:
                         pass
+                # Afficher immédiatement la position du Demogorgon si déjà apparu
+                try:
+                    if getattr(game, 'demogorgon_spawned', False):
+                        dem_pos = None
+                        for r in getattr(game, 'rooms', []) or []:
+                            for cname in getattr(r, 'characters', {}).keys():
+                                try:
+                                    norm = ''.join(c for c in unicodedata.normalize('NFD', cname).lower() if unicodedata.category(c) != 'Mn')
+                                except Exception:
+                                    norm = cname.lower()
+                                if 'demogorgon' in norm:
+                                    dem_pos = r.name
+                                    break
+                            if dem_pos:
+                                break
+                        if dem_pos:
+                            print(f"\n[monster_tracker] Le monstre est actuellement à : {dem_pos}")
+                except Exception:
+                    pass
             except Exception:
                 pass
         # Message narratif spécial si le joueur prend l'épée

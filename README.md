@@ -77,15 +77,14 @@ La course d'orientation se déroule dans les lieux suivants:
 
 Le système de quêtes vous guide à travers la course d'orientation:
 
-- **Quêtes activables** : Découvrez-les en explorant
-- **Objectifs progressifs** : Chaque quête a plusieurs étapes
-- **Suivi automatique** : Vos progrès se mettent à jour au fil de vos actions
-- **Récompenses** : Gagnez des bonus en complétant les quêtes
-- **Activation automatique** : Certaines quêtes s'activent en visitant des lieux clés
 
+
+
+- **Activation automatique** : Les quêtes vont s'activer en visitant des lieux clés
+- **Récompenses** : Gagnez des objets en complétant les quêtes
+- **Quêtes activables** : Vous pouvez activer une quête si besoin mais ce n'est pas nécessaire si vous suivez bien les indications du jeu.
 **Types d'objectifs :**
 - **Objectifs de visite** : Visiter des lieux spécifiques
-- **Objectifs de compteur** : Accomplir des actions un certain nombre de fois (ex: explorer 5 pièces)
 - **Objectifs d'items** : Collecter des objets essentiels
 
 ## Items Clés
@@ -185,61 +184,69 @@ Combat final → Victoire ou mort
    - Cherchez **Jean Bomber** afin de lui demander où se situe le **Club Musique**
    - Allez au Club Musique via **Parking**
    - **N'oubliez pas la clé** dans le Club Musique!!
-   - Le Démogorgon spawn maintenant dans la Rue! (Votre entrée dans le club musique déclenche son apparition, c'est comme si on était dans l'upside down dans stranger things, la série netlix)
+   - Le Démogorgon spawn maintenant dans la Rue! (Votre entrée dans le club musique déclenche son apparition, c'est comme si on était dans l'upside down dans stranger things, la série netlix).
 
 3. **Récupérer le tracker**
-    - En sortant, récuperer le sac et fouillez son contenu afin d'obtenir le **monster_tracker**
-   - Cet item vous permet de tracker le Démogorgon
+    - En sortant, récuperer le sac et fouillez son contenu afin d'obtenir le **monster_tracker**.
+   - Cet item vous permet de tracker le Démogorgon.
 
 4. **Trouver la carte**
    - Retournez au Couloir 1
    - Montez nord vers Salle 2 (utilisez la clé)
-   - Prenez la **carte** montrant l'épée
+   - Prenez la **carte** montrant où est **l'épée**.
 
 5. **Récupérer l'épée**
    - Allez au **Jardin** via la Salle 1
-   - Trouvez l'emplacement marqué par la croix
-   - Prenez l'**épée** - votre arme de combat
+   - Prenez l'**épée** - votre arme de combat.
 
 6. **Combat final**
-    - Localisez le Démogorgon via le monster_tracker
+    - Localisez le **Démogorgon** via le ****monster_tracker** en appuyant sur *stay*
    - Approchez-vous et acceptez le combat
    - Victoire!
 
 ### Conseils Importants:
 
-⚠️ **Ne refusez JAMAIS le combat** avec le Démogorgon - vous serez terrassé
+**Avant toute chose** : penser à avoir **Tkinter** (normalement inclus dans les installations Pythons officielles sur Windows), et l'extension **Pillow (PIL)** pour l'affichage des images sur l'interface graphique.
 
-🔐 **Déverrouiller Salle 2** est crucial pour progresser
+**Lors de la partie :** 
 
-🏃 **Le Démogorgon se déplace chaque tour** - utilisez le monster_tracker pour le suivre
+**Toujours effectuer un *look*** dans la salle dans laquelle vous vous trouvez pour voir s'il y a un **objet** ou un **PNJ** à qui parler.
 
-📦 **Limite d'inventaire: 3 items max** - triez les affaires utiles des autres!
+**Ne refusez JAMAIS le combat** avec le Démogorgon - vous serez terrassé.
+
+**Déverrouiller Salle 2** est crucial pour progresser.
+
+**Le Démogorgon se déplace chaque tour** - utilisez le monster_tracker pour connaître sa posi.
+
+**Limite d'inventaire: 3 items max** - triez les affaires utiles des autres!
 
 ## Fichiers du Projet
 
 ```
 TBA2/
+├── README.md            # Contient un guide utlisateurn développeur et des perspectives de développement. 
 ├── game.py              # Boucle principale et initialisation
 ├── room.py              # Définition des salles
 ├── player.py            # Gestion du joueur
 ├── character.py         # PNJ et monstre (Démogorgon)
 ├── item.py              # Système d'items
 ├── command.py           # Structure des commandes
-├── actions.py           # Implémentation des commandes (800+ lignes)
-├── quest.py             # Système de quêtes complet (780+ lignes)
-├── README.md            # Ce fichier
-└── tmp_test_pnj.py      # Fichier de test
+├── actions.py           # Implémentation des commandes 
+├── quest.py             # Système de quêtes 
+└── vidéo.mp4            # Vidéo explicative de notre jeu.
+
 ```
 
 ## Améliorations Futures Possibles
 
-- 🎮 Système de combat plus détaillé (dégâts, santé)
-- 🗺️ Carte interactive du monde
-- 💬 Dialogue branché avec plusieurs autres PNJ
-- 📱 Interface graphique complète et plus lisible
-- 🏆 Système de scores et classements
-- 👾 Ennemis multiples
+- Système de combat plus détaillé (dégâts, santé).
+- Carte interactive du monde et + complète.
+- Dialogue avec plusieurs autres PNJ.
+- changement de fin en fonction des réponses données.
+- Interface graphique améliorée (thème adapté lorsqu'on se retrouve dans l'upside down, interface + sophistiquée)
+- Système de scores et classements avec les autres joueurs qui visitent l'école sous cette forme pour les encourager à jouer.
+- Encore plus de quêtes
+- Ajout de références marrantes sur des évènements qui se sont passées les quelques dernières années.
 
 ---
 
@@ -422,4 +429,4 @@ classDiagram
 
 ---
 
-**Bon jeu ! Pouvez-vous surpasser le Démogorgon?** 
+**Bon jeu !** 

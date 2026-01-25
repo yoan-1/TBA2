@@ -417,6 +417,18 @@ class Game:
                 self._pnjs_moved = False
                 self._pnjs_moved_this_turn = set()
 
+            # Déplacer le Démogorgon au moins une fois par tour (mouvement aléatoire)
+            try:
+                demog = getattr(self, 'demogorgon', None)
+                if getattr(self, 'demogorgon_spawned', False) and demog:
+                    moved_pnjs = getattr(self, '_pnjs_moved_this_turn', set())
+                    if id(demog) not in moved_pnjs:
+                        demog.move(self)
+                        moved_pnjs.add(id(demog))
+                    self._pnjs_moved_this_turn = moved_pnjs
+            except Exception:
+                pass
+
     # Traiter la commande saisie par le joueur
     def process_command(self, command_string) -> None:
         """Traite et exécute une commande tapée par le joueur."""
